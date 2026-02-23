@@ -12,7 +12,7 @@ async function signOut() {
 
 export default function DashboardPage() {
   return (
-    <main className="min-h-screen bg-slate-100 px-6 py-10">
+    <main className="h-full bg-slate-100 px-6 py-10">
       <section className="mx-auto w-full max-w-5xl rounded-2xl border border-slate-200 bg-white p-8 shadow-sm md:p-10">
         <div className="mb-8 flex flex-col justify-between gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-center">
           <div>

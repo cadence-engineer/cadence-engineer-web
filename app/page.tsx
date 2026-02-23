@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-6">
+    <main className="flex h-full items-center justify-center bg-slate-100 px-6 py-10">
       <section className="w-full max-w-3xl rounded-2xl border border-slate-200 bg-white p-8 shadow-sm md:p-12">
         <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
           Cadence Engineer

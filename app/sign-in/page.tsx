@@ -18,7 +18,7 @@ async function signIn() {
 
 export default function SignInPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-6">
+    <main className="flex h-full items-center justify-center bg-slate-100 px-6 py-10">
       <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
         <h1 className="mb-2 text-3xl font-bold tracking-tight text-slate-900">
           Sign in
