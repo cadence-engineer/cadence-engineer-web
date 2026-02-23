@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "geist/icons": ["./lib/geist-icons"]
     }
   },
   "include": [

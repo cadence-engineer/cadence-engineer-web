@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export default function Home() {
   return (
     <main className="flex h-full items-center justify-center bg-white px-6 py-10">
@@ -11,20 +9,6 @@ export default function Home() {
           Connect your workflow, coordinate automation, and stay aligned with
           your backend services in one place.
         </p>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <Link
-            href="/sign-in"
-            className="inline-flex items-center justify-center rounded-lg bg-[#FF2D55] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#E60045]"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center justify-center rounded-lg bg-[#FFD6E0] px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#FFB3C4]"
-          >
-            Go to dashboard
-          </Link>
-        </div>
       </section>
     </main>
   );

@@ -18,6 +18,14 @@ export function Header() {
             priority
           />
         </Link>
+        <nav className="flex items-center gap-6 text-sm font-semibold">
+          <Link href="/pricing" className="text-[#FF2D55] hover:text-[#E60045]">
+            Pricing
+          </Link>
+          <Link href="/sign-in" className="text-[#FF2D55] hover:text-[#E60045]">
+            Sign in
+          </Link>
+        </nav>
       </div>
     </header>
   );

@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { LogoGithub } from "geist/icons";
 
 async function signIn() {
   "use server";
@@ -29,9 +30,10 @@ export default function SignInPage() {
         <form action={signIn}>
           <button
             type="submit"
-            className="w-full rounded-lg bg-[#FF2D55] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#E60045]"
+            className="inline-flex w-full items-center justify-center gap-3 rounded-lg bg-[#FF2D55] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#E60045]"
           >
-            Sign in
+            <LogoGithub className="h-5 w-5" />
+            Sign in with GitHub
           </button>
         </form>
       </section>
