@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Header } from "./components/header";
 import { Footer } from "./components/footer";
 
 export const metadata: Metadata = {
   title: "Cadence Engineer",
   description: "Cadence Engineer web app",
+  icons: {
+    icon: [{ url: "/cadence-logo.svg", type: "image/svg+xml" }],
+    shortcut: "/cadence-logo.svg",
+    apple: "/cadence-logo.svg",
+  },
 };
 
 export default function RootLayout({
@@ -15,6 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="flex min-h-screen flex-col antialiased">
+        <Header />
         <main className="flex-1">{children}</main>
         <Footer />
       </body>
