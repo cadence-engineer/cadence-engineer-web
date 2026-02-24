@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function PricingPage() {
   return (
-    <main className="h-full bg-white px-6 py-8 md:px-8 md:py-10">
+    <main className="h-full bg-transparent px-6 py-8 md:px-8 md:py-10">
       <section className="mx-auto w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-[0_14px_40px_rgba(0,0,0,0.18)]">
         <div className="bg-[#FF2D55] px-8 py-8 md:p-10">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-white">
