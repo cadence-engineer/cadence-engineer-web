@@ -9,8 +9,8 @@ export const metadata: Metadata = {
 export default function PricingPage() {
   return (
     <main className="h-full bg-white px-6 py-8 md:px-8 md:py-10">
-      <section className="mx-auto w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-[0_24px_60px_rgba(0,0,0,0.2)]">
-        <div className="bg-[#FF2D55] px-8 py-8 md:px-10 md:py-10">
+      <section className="mx-auto w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-[0_14px_40px_rgba(0,0,0,0.18)]">
+        <div className="bg-[#FF2D55] px-8 py-8 md:p-10">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-white">
             Simple, transparent pricing
           </p>
@@ -19,8 +19,8 @@ export default function PricingPage() {
           </h1>
         </div>
 
-        <div className="bg-white px-8 py-8 md:px-10 md:py-10">
-          <article className="mx-auto max-w-xl rounded-2xl bg-white p-8 text-center">
+        <div className="bg-white px-8 py-8 md:p-10">
+          <article className="mx-auto max-w-2xl rounded-2xl bg-white p-8 text-center">
             <div className="mb-5 flex items-end justify-center gap-2">
               <span className="text-7xl font-black leading-none text-black md:text-8xl">
                 69
