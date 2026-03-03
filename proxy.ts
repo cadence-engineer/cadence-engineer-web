@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isSignedIn = request.cookies.get("cadence_session")?.value === "1";
+  const isSignedIn = request.cookies.get("cadence_session")?.value === "github";
 
   const isLandingPage = pathname === "/";
   const isSignInPage = pathname === "/sign-in";

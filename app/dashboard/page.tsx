@@ -6,11 +6,16 @@ async function signOut() {
 
   const cookieStore = await cookies();
   cookieStore.delete("cadence_session");
+  cookieStore.delete("cadence_github_login");
+  cookieStore.delete("cadence_oauth_state");
 
   redirect("/");
 }
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const cookieStore = await cookies();
+  const githubLogin = cookieStore.get("cadence_github_login")?.value;
+
   return (
     <main className="h-full bg-transparent px-6 py-8 md:px-8 md:py-10">
       <section className="mx-auto w-full max-w-4xl rounded-2xl bg-white p-8 shadow-[0_14px_40px_rgba(0,0,0,0.18)] md:p-10">
@@ -19,6 +24,9 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-bold tracking-tight text-black">
               Dashboard
             </h1>
+            {githubLogin ? (
+              <p className="mt-1 text-sm text-black/75">Signed in as @{githubLogin}</p>
+            ) : null}
           </div>
           <form action={signOut}>
             <button

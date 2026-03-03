@@ -1,4 +1,19 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Environment
+
+Create a local `.env.local` file:
+
+```bash
+CADENCE_API_BASE_URL=http://localhost:8080
+NEXT_PUBLIC_CADENCE_API_BASE_URL=http://localhost:8080
+GITHUB_CLIENT_ID=Iv23lijjDVweMxra8ZGz
+GITHUB_CLIENT_SECRET=your-github-client-secret
+```
+
+For GitHub OAuth, set the callback URL in your GitHub app to:
+
+```text
+http://localhost:3000/auth/github/callback
+```
 
 ## Getting Started
 
