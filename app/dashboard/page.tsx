@@ -1,20 +1,74 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+"use client";
 
-async function signOut() {
-  "use server";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { fetchCurrentUser, logoutCurrentSession, type AuthUser } from "@/lib/api/auth-client";
 
-  const cookieStore = await cookies();
-  cookieStore.delete("cadence_session");
-  cookieStore.delete("cadence_github_login");
-  cookieStore.delete("cadence_oauth_state");
+export default function DashboardPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
-  redirect("/");
-}
+  useEffect(() => {
+    let mounted = true;
 
-export default async function DashboardPage() {
-  const cookieStore = await cookies();
-  const githubLogin = cookieStore.get("cadence_github_login")?.value;
+    fetchCurrentUser()
+      .then((currentUser) => {
+        if (!mounted) {
+          return;
+        }
+
+        if (!currentUser) {
+          router.replace("/sign-in");
+          return;
+        }
+
+        setUser(currentUser);
+      })
+      .catch((error) => {
+        console.error("Auth check failed", error);
+        if (mounted) {
+          router.replace("/sign-in?error=auth_unavailable");
+        }
+      })
+      .finally(() => {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [router]);
+
+  async function handleSignOut() {
+    setIsSigningOut(true);
+    try {
+      await logoutCurrentSession();
+    } catch (error) {
+      console.error("Logout failed", error);
+    } finally {
+      router.replace("/sign-in");
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <main className="h-full bg-transparent px-6 py-8 md:px-8 md:py-10">
+        <section className="mx-auto w-full max-w-4xl rounded-2xl bg-white p-8 shadow-[0_14px_40px_rgba(0,0,0,0.18)] md:p-10">
+          <p className="text-sm text-black/75">Loading your dashboard...</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  const githubLogin = user.login ?? user.username ?? null;
 
   return (
     <main className="h-full bg-transparent px-6 py-8 md:px-8 md:py-10">
@@ -28,14 +82,14 @@ export default async function DashboardPage() {
               <p className="mt-1 text-sm text-black/75">Signed in as @{githubLogin}</p>
             ) : null}
           </div>
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="rounded-lg bg-[#FFD6E0] px-4 py-2 text-sm font-semibold text-black transition hover:bg-[#FFB3C4]"
-            >
-              Sign out
-            </button>
-          </form>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            disabled={isSigningOut}
+            className="rounded-lg bg-[#FFD6E0] px-4 py-2 text-sm font-semibold text-black transition hover:bg-[#FFB3C4] disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {isSigningOut ? "Signing out..." : "Sign out"}
+          </button>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">

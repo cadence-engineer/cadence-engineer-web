@@ -1,7 +1,7 @@
 # AGENTS.md
 
 ## Purpose
-This repository is a Next.js (App Router, TypeScript) frontend for the `cadence-engineer-api` Vapor backend.
+This repository is a pure frontend Next.js (App Router, TypeScript) web app for the `cadence-engineer-api` Vapor backend.
 
 Agents working here should prioritize:
 - Safe, typed API integration.
@@ -27,20 +27,20 @@ Agents working here should prioritize:
 2. Do not scatter raw `fetch` calls across unrelated UI components.
 3. Keep endpoint paths, headers, and error handling in one place.
 4. Use TypeScript types for request/response payloads.
-5. Prefer server-side data fetching when SEO/perf allows it.
-6. For browser-side calls, only expose safe values via `NEXT_PUBLIC_*` env vars.
+5. Use browser-side calls for app data and auth flows; do not add Next.js API routes or server auth handlers in this repo.
+6. Keep backend base URLs centralized in `DEV_API_URL` and `PROD_API_URL`.
 
 ## Environment Variables
 Use these names unless the project already defines alternatives:
-- `CADENCE_API_BASE_URL`: server-side base URL for Vapor API.
-- `NEXT_PUBLIC_CADENCE_API_BASE_URL`: optional public base URL for client-side requests.
+- `DEV_API_URL`: base URL for backend calls in local development.
+- `PROD_API_URL`: base URL for backend calls in production.
 
 Typical local backend URL is `http://localhost:8080` (adjust if your Vapor app runs elsewhere).
 
 ## App Router Conventions
 1. Keep route UI in `app/**`.
 2. Put reusable non-UI logic in `lib/**`.
-3. Prefer Server Components by default; use Client Components only when interactivity is required.
+3. Prefer Client Components for authenticated app routes and browser-driven auth state.
 4. Keep page-level loading/error states explicit (`loading.tsx`, `error.tsx`) for async routes.
 
 ## Error Handling

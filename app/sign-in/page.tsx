@@ -1,30 +1,59 @@
-import Link from "next/link";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { LogoGithub } from "geist/icons";
+import { fetchCurrentUser } from "@/lib/api/auth-client";
+import { getGitHubAuthStartUrl } from "@/lib/api/client";
 
-type SignInPageProps = {
-  searchParams: Promise<{
-    error?: string;
-  }>;
-};
-
-function getErrorMessage(error?: string): string | null {
+function getErrorMessage(error: string | null): string | null {
   switch (error) {
-    case "invalid_state":
-      return "Authentication failed. Please try signing in again.";
     case "access_denied":
       return "GitHub access was denied. Please approve access to continue.";
-    case "github_not_configured":
-      return "GitHub OAuth is not fully configured. Set GITHUB_CLIENT_SECRET and try again.";
-    case "oauth_failed":
-      return "We could not complete GitHub sign-in. Please try again.";
+    case "auth_unavailable":
+      return "Authentication service is currently unavailable. Please try again.";
     default:
       return null;
   }
 }
 
-export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const { error } = await searchParams;
-  const errorMessage = getErrorMessage(error);
+export default function SignInPage() {
+  const router = useRouter();
+  const query = useSearchParams();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    fetchCurrentUser()
+      .then((user) => {
+        if (mounted && user) {
+          router.replace("/dashboard");
+        }
+      })
+      .catch((error) => {
+        console.error("Auth check failed on sign-in page", error);
+      })
+      .finally(() => {
+        if (mounted) {
+          setIsCheckingAuth(false);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [router]);
+
+  const errorMessage = useMemo(() => getErrorMessage(query.get("error")), [query]);
+  const authUrl = useMemo(() => {
+    try {
+      return getGitHubAuthStartUrl();
+    } catch {
+      return null;
+    }
+  }, []);
+  const authUrlMissingMessage = "Authentication URL is not configured. Set DEV_API_URL and PROD_API_URL.";
 
   return (
     <main className="flex h-full items-center justify-center bg-transparent px-6 py-8 md:px-8 md:py-10">
@@ -40,13 +69,25 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
             {errorMessage}
           </p>
         ) : null}
-        <Link
-          href="/auth/github"
-          className="inline-flex w-full items-center justify-center gap-3 rounded-lg bg-[#FF2D55] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#E60045]"
-        >
-          <LogoGithub className="h-5 w-5" />
-          Sign in with GitHub
-        </Link>
+        {isCheckingAuth ? (
+          <p className="mb-4 rounded-md bg-[#FFF3F7] px-3 py-2 text-sm text-[#8A1230]">
+            Checking your session...
+          </p>
+        ) : null}
+        {authUrl ? (
+          <a
+            href={authUrl}
+            className={`inline-flex w-full items-center justify-center gap-3 rounded-lg bg-[#FF2D55] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#E60045] ${isCheckingAuth ? "pointer-events-none opacity-70" : ""}`}
+            aria-disabled={isCheckingAuth}
+          >
+            <LogoGithub className="h-5 w-5" />
+            Sign in with GitHub
+          </a>
+        ) : (
+          <p className="rounded-md bg-[#FFE8EE] px-3 py-2 text-sm text-[#8A1230]">
+            {authUrlMissingMessage}
+          </p>
+        )}
       </section>
     </main>
   );

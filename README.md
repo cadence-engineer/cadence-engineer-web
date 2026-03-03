@@ -3,17 +3,14 @@
 Create a local `.env.local` file:
 
 ```bash
-CADENCE_API_BASE_URL=http://localhost:8080
-NEXT_PUBLIC_CADENCE_API_BASE_URL=http://localhost:8080
-GITHUB_CLIENT_ID=Iv23lijjDVweMxra8ZGz
-GITHUB_CLIENT_SECRET=your-github-client-secret
+DEV_API_URL=http://localhost:8080
+PROD_API_URL=https://api.cadence.engineer
 ```
 
-For GitHub OAuth, set the callback URL in your GitHub app to:
-
-```text
-http://localhost:3000/auth/github/callback
-```
+This app is frontend-only:
+- "Sign in with GitHub" uses `${API_BASE}/v1/auth/github/start`.
+- Session state is read from backend `GET /v1/auth/me`.
+- Sign-out calls backend `POST /v1/auth/logout`.
 
 ## Getting Started
 
