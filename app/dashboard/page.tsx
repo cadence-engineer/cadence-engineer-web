@@ -1,47 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { fetchCurrentUser, logoutCurrentSession, type AuthUser } from "@/lib/api/auth-client";
+import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { logoutCurrentSession } from "@/lib/api/auth-client";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const query = useSearchParams();
   const [isSigningOut, setIsSigningOut] = useState(false);
-
-  useEffect(() => {
-    let mounted = true;
-
-    fetchCurrentUser()
-      .then((currentUser) => {
-        if (!mounted) {
-          return;
-        }
-
-        if (!currentUser) {
-          router.replace("/sign-in");
-          return;
-        }
-
-        setUser(currentUser);
-      })
-      .catch((error) => {
-        console.error("Auth check failed", error);
-        if (mounted) {
-          router.replace("/sign-in?error=auth_unavailable");
-        }
-      })
-      .finally(() => {
-        if (mounted) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, [router]);
+  const showAuthSuccess = useMemo(() => query.get("auth") === "success", [query]);
 
   async function handleSignOut() {
     setIsSigningOut(true);
@@ -54,33 +21,19 @@ export default function DashboardPage() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <main className="h-full bg-transparent px-6 py-8 md:px-8 md:py-10">
-        <section className="mx-auto w-full max-w-4xl rounded-2xl bg-white p-8 shadow-[0_14px_40px_rgba(0,0,0,0.18)] md:p-10">
-          <p className="text-sm text-black/75">Loading your dashboard...</p>
-        </section>
-      </main>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
-  const githubLogin = user.login ?? user.username ?? null;
-
   return (
     <main className="h-full bg-transparent px-6 py-8 md:px-8 md:py-10">
       <section className="mx-auto w-full max-w-4xl rounded-2xl bg-white p-8 shadow-[0_14px_40px_rgba(0,0,0,0.18)] md:p-10">
+        {showAuthSuccess ? (
+          <p className="mb-4 rounded-md bg-[#E8FFEF] px-3 py-2 text-sm text-[#146B2E]">
+            Successfully authenticated with GitHub.
+          </p>
+        ) : null}
         <div className="mb-8 flex flex-col justify-between gap-4 pb-6 sm:flex-row sm:items-center">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-black">
               Dashboard
             </h1>
-            {githubLogin ? (
-              <p className="mt-1 text-sm text-black/75">Signed in as @{githubLogin}</p>
-            ) : null}
           </div>
           <button
             type="button"

@@ -5,12 +5,25 @@ Create a local `.env.local` file:
 ```bash
 DEV_API_URL=http://localhost:8080
 PROD_API_URL=https://api.cadence.engineer
+GITHUB_CLIENT_ID=your-github-client-id
 ```
 
-This app is frontend-only:
-- "Sign in with GitHub" uses `${API_BASE}/v1/auth/github/start`.
-- Session state is read from backend `GET /v1/auth/me`.
-- Sign-out calls backend `POST /v1/auth/logout`.
+## Authentication Architecture (BFF)
+
+Cadence web uses Next.js as a BFF between browser and Vapor API:
+- Browser starts login at `GET /auth/github/start` on `cadence.engineer`.
+- Next.js generates OAuth `state` and redirects to GitHub.
+- GitHub returns to `GET /auth/github/callback` on Next.js.
+- Next.js validates `state`, then calls Vapor server-to-server:
+  - `POST {API_BASE}/oauth/github/exchange` with `{ "code": "<auth_code>" }`.
+- Vapor resolves GitHub identity and returns Cadence auth tokens to Next.js.
+- Next.js sets HttpOnly auth cookies and redirects to the app.
+
+Browser auth/session calls go to Next.js BFF endpoints:
+- `GET /api/auth/me`
+- `POST /api/auth/logout`
+
+The browser does not call `api.cadence.engineer` directly for auth and never receives GitHub tokens.
 
 ## Getting Started
 
