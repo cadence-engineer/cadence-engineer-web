@@ -4,7 +4,6 @@ import { AUTH_COOKIE_NAMES, getIsSecureCookie } from "@/lib/server/auth-cookies"
 
 type ExchangeResponse = {
   accessToken: string;
-  refreshToken: string;
 };
 
 function getSignInErrorUrl(request: NextRequest, error: string): URL {
@@ -44,10 +43,10 @@ export async function GET(request: NextRequest) {
     }
 
     const payload = (await exchangeResponse.json()) as ExchangeResponse;
-    const { accessToken, refreshToken } = payload;
+    const { accessToken } = payload;
 
-    if (typeof accessToken !== "string" || typeof refreshToken !== "string") {
-      console.error("OAuth exchange payload missing required token fields");
+    if (typeof accessToken !== "string") {
+      console.error("OAuth exchange payload missing required access token");
       return redirectToSignInWithError(request, "oauth_failed");
     }
 
@@ -59,13 +58,6 @@ export async function GET(request: NextRequest) {
       sameSite: "lax",
       path: "/",
       maxAge: 60 * 15,
-    });
-    response.cookies.set(AUTH_COOKIE_NAMES.refresh, refreshToken, {
-      httpOnly: true,
-      secure: getIsSecureCookie(),
-      sameSite: "lax",
-      path: "/api/auth/refresh",
-      maxAge: 60 * 60 * 24 * 30,
     });
 
     return response;

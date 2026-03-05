@@ -27,13 +27,6 @@ export async function POST(request: NextRequest) {
     path: "/",
     maxAge: 0,
   });
-  response.cookies.set(AUTH_COOKIE_NAMES.refresh, "", {
-    httpOnly: true,
-    secure: getIsSecureCookie(),
-    sameSite: "lax",
-    path: "/api/auth/refresh",
-    maxAge: 0,
-  });
 
   return response;
 }

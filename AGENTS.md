@@ -51,9 +51,9 @@ Typical local backend URL is `http://localhost:8080` (adjust if your Vapor app r
 1. Browser starts login at `GET /auth/github/start` (Next.js).
 2. Next.js generates OAuth `state`, stores it in HttpOnly cookie, and redirects to GitHub authorize URL.
 3. GitHub redirects back to `GET /auth/github/callback?code=...&state=...` (Next.js).
-4. Next.js validates `state` and calls Vapor server-to-server `POST /oauth/github/exchange` with `{ code }`.
-5. Vapor exchanges GitHub code, resolves Cadence user, and returns Cadence auth tokens to Next.js.
-6. Next.js stores Cadence auth in HttpOnly cookies and redirects browser into the app.
+4. Next.js validates `state` and calls Vapor server-to-server `POST /v1/auth/github` with `{ code }`.
+5. Vapor exchanges the GitHub code, resolves the Cadence user, and returns `{ accessToken }` to Next.js.
+6. Next.js stores the Cadence access token in an HttpOnly cookie and redirects browser into the app.
 7. Browser uses Next.js BFF routes (`/api/auth/me`, `/api/auth/logout`) for session operations.
 
 ## Error Handling

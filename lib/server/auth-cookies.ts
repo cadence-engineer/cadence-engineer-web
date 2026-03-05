@@ -1,6 +1,5 @@
 export const AUTH_COOKIE_NAMES = {
   access: "cadence_access",
-  refresh: "cadence_refresh",
   oauthState: "cadence_oauth_state",
 } as const;
 
