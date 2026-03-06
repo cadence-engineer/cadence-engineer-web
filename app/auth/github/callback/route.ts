@@ -38,7 +38,13 @@ export async function GET(request: NextRequest) {
     });
 
     if (!exchangeResponse.ok) {
-      console.error("OAuth exchange failed", await exchangeResponse.text());
+      let exchangeErrorBody = "<failed to read error body>";
+      try {
+        exchangeErrorBody = await exchangeResponse.text();
+      } catch (readError) {
+        console.error("OAuth exchange failed to read error body", readError);
+      }
+      console.error("OAuth exchange failed", exchangeErrorBody);
       return redirectToSignInWithError(request, "oauth_failed");
     }
 
