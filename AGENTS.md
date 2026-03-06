@@ -1,7 +1,9 @@
 # AGENTS.md
 
 ## Purpose
-This repository is a Next.js (App Router, TypeScript) frontend for the `cadence-engineer-api` Vapor backend.
+This repository is a Next.js (App Router, TypeScript) web app for the `cadence-engineer-api` Vapor backend.
+
+The app is mostly frontend, but authentication and API access use a BFF layer in Next.js route handlers.
 
 Agents working here should prioritize:
 - Safe, typed API integration.
@@ -27,21 +29,32 @@ Agents working here should prioritize:
 2. Do not scatter raw `fetch` calls across unrelated UI components.
 3. Keep endpoint paths, headers, and error handling in one place.
 4. Use TypeScript types for request/response payloads.
-5. Prefer server-side data fetching when SEO/perf allows it.
-6. For browser-side calls, only expose safe values via `NEXT_PUBLIC_*` env vars.
+5. Browser code must call Next.js BFF endpoints (`/api/**`) instead of calling `api.cadence.engineer` directly.
+6. Next.js route handlers perform server-to-server calls to Vapor using `DEV_API_URL` / `PROD_API_URL`.
 
 ## Environment Variables
 Use these names unless the project already defines alternatives:
-- `CADENCE_API_BASE_URL`: server-side base URL for Vapor API.
-- `NEXT_PUBLIC_CADENCE_API_BASE_URL`: optional public base URL for client-side requests.
+- `DEV_API_URL`: base URL for backend calls in local development.
+- `PROD_API_URL`: base URL for backend calls in production.
+- `GITHUB_CLIENT_ID`: GitHub OAuth app client ID used by Next.js `/auth/github/start`.
 
 Typical local backend URL is `http://localhost:8080` (adjust if your Vapor app runs elsewhere).
 
 ## App Router Conventions
 1. Keep route UI in `app/**`.
 2. Put reusable non-UI logic in `lib/**`.
-3. Prefer Server Components by default; use Client Components only when interactivity is required.
-4. Keep page-level loading/error states explicit (`loading.tsx`, `error.tsx`) for async routes.
+3. Keep browser-facing auth entry/callback routes in `app/auth/**`.
+4. Keep BFF API handlers in `app/api/**`.
+5. Keep page-level loading/error states explicit (`loading.tsx`, `error.tsx`) for async routes.
+
+## Canonical Auth Flow (BFF)
+1. Browser starts login at `GET /auth/github/start` (Next.js).
+2. Next.js generates OAuth `state`, stores it in HttpOnly cookie, and redirects to GitHub authorize URL.
+3. GitHub redirects back to `GET /auth/github/callback?code=...&state=...` (Next.js).
+4. Next.js validates `state` and calls Vapor server-to-server `POST /v1/auth/github` with `{ code }`.
+5. Vapor exchanges the GitHub code, resolves the Cadence user, and returns `{ accessToken }` to Next.js.
+6. Next.js stores the Cadence access token in an HttpOnly cookie and redirects browser into the app.
+7. Browser uses Next.js BFF routes (`/api/auth/me`, `/api/auth/logout`) for session operations.
 
 ## Error Handling
 - Always handle non-2xx API responses explicitly.

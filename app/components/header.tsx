@@ -11,9 +11,9 @@ export function Header() {
           aria-label="Cadence Engineer home"
         >
           <Image
-            src="/cadence-banner.svg"
+            src="/cadence-icon.svg"
             alt="Cadence Engineer"
-            width={146}
+            width={36}
             height={36}
             priority
           />

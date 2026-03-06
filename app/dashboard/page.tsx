@@ -1,33 +1,48 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+"use client";
 
-async function signOut() {
-  "use server";
-
-  const cookieStore = await cookies();
-  cookieStore.delete("cadence_session");
-
-  redirect("/");
-}
+import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { logoutCurrentSession } from "@/lib/api/auth-client";
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const query = useSearchParams();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const showAuthSuccess = useMemo(() => query.get("auth") === "success", [query]);
+
+  async function handleSignOut() {
+    setIsSigningOut(true);
+    try {
+      await logoutCurrentSession();
+    } catch (error) {
+      console.error("Logout failed", error);
+    } finally {
+      router.replace("/sign-in");
+    }
+  }
+
   return (
     <main className="h-full bg-transparent px-6 py-8 md:px-8 md:py-10">
       <section className="mx-auto w-full max-w-4xl rounded-2xl bg-white p-8 shadow-[0_14px_40px_rgba(0,0,0,0.18)] md:p-10">
+        {showAuthSuccess ? (
+          <p className="mb-4 rounded-md bg-[#E8FFEF] px-3 py-2 text-sm text-[#146B2E]">
+            Successfully authenticated with GitHub.
+          </p>
+        ) : null}
         <div className="mb-8 flex flex-col justify-between gap-4 pb-6 sm:flex-row sm:items-center">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-black">
               Dashboard
             </h1>
           </div>
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="rounded-lg bg-[#FFD6E0] px-4 py-2 text-sm font-semibold text-black transition hover:bg-[#FFB3C4]"
-            >
-              Sign out
-            </button>
-          </form>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            disabled={isSigningOut}
+            className="rounded-lg bg-[#FFD6E0] px-4 py-2 text-sm font-semibold text-black transition hover:bg-[#FFB3C4] disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {isSigningOut ? "Signing out..." : "Sign out"}
+          </button>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
