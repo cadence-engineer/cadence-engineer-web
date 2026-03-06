@@ -19,6 +19,11 @@ function redirectToSignInWithError(request: NextRequest, error: string): NextRes
 }
 
 export async function GET(request: NextRequest) {
+  const oauthError = request.nextUrl.searchParams.get("error");
+  if (oauthError === "access_denied") {
+    return redirectToSignInWithError(request, "access_denied");
+  }
+
   const code = request.nextUrl.searchParams.get("code");
   const state = request.nextUrl.searchParams.get("state");
   const expectedState = request.cookies.get(AUTH_COOKIE_NAMES.oauthState)?.value;
