@@ -23,7 +23,7 @@ export default function PricingPage() {
           <article className="mx-auto max-w-2xl rounded-2xl bg-white p-8 text-center">
             <div className="mb-5 flex items-end justify-center gap-2">
               <span className="text-7xl font-black leading-none text-black md:text-8xl">
-                69
+                ??
               </span>
               <span className="text-7xl font-black leading-none text-black md:text-8xl">
                 €
@@ -36,7 +36,7 @@ export default function PricingPage() {
               href="/sign-in"
               className="inline-flex w-full items-center justify-center rounded-lg bg-[#FF2D55] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#E60045]"
             >
-              Start with Standard
+              Get started
             </Link>
           </article>
         </div>
