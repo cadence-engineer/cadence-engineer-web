@@ -6,8 +6,8 @@ export function Footer() {
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 text-sm text-black">
         <p className="text-[#FF2D55]">© {new Date().getFullYear()} Cadence Engineer</p>
         <div className="flex items-center gap-4">
-          <Link href="/impressum" className="font-medium text-[#FF2D55] hover:text-[#E60045]">
-            Impressum
+          <Link href="/contact" className="font-medium text-[#FF2D55] hover:text-[#E60045]">
+            Contact
           </Link>
           <Link href="/cookies" className="font-medium text-[#FF2D55] hover:text-[#E60045]">
             Cookies
