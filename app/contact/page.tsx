@@ -10,7 +10,7 @@ export default function ContactPage() {
     <main className="h-full bg-transparent px-6 py-8 md:px-8 md:py-10">
       <section className="mx-auto w-full max-w-4xl rounded-2xl bg-white p-8 shadow-[0_14px_40px_rgba(0,0,0,0.18)] md:p-10">
         <h1 className="mb-4 text-3xl font-bold tracking-tight text-black">Contact</h1>
-        <p className="mb-4 text-black">
+        <address className="mb-4 not-italic text-black">
           Dominik Strasser
           <br />
           dominik.strasser@cadence.engineer
@@ -20,7 +20,7 @@ export default function ContactPage() {
           Vienna 1120
           <br />
           Austria
-        </p>
+        </address>
       </section>
     </main>
   );
