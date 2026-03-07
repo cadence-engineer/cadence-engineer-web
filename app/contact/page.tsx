@@ -21,9 +21,6 @@ export default function ContactPage() {
           <br />
           Austria
         </p>
-        <p className="text-black">
-          This website is currently in development and is not intended for public use.
-        </p>
       </section>
     </main>
   );

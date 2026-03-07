@@ -25,6 +25,9 @@ export default function RootLayout({
       <body className={`${GeistSans.variable} relative flex min-h-screen flex-col antialiased`}>
         <LandingNodeBackground />
         <div className="relative z-10 flex min-h-screen flex-col">
+          <div className="bg-[#FF2D55] px-6 py-2 text-center text-sm font-semibold text-white md:px-8">
+            This website is currently in development and is not intended for public use.
+          </div>
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
