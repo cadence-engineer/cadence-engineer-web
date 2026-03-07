@@ -65,7 +65,7 @@ Typical local backend URL is `http://localhost:8080` (adjust if your Vapor app r
 ## Change Guidelines For Agents
 1. Before editing, inspect existing patterns in nearby files.
 2. Make the smallest change that satisfies the request.
-3. Run `pnpm run lint` and `pnpm run build` before finishing. If `pnpm run build` fails due environment/tooling restrictions, run `pnpm run build:webpack`.
+3. Run `pnpm run lint` and `pnpm run build` before finishing. If `pnpm run build` fails due to environment/tooling restrictions, run `pnpm run build:webpack`.
 4. If you introduce new env vars or scripts, update `README.md`.
 5. Do not add dependencies unless they are clearly necessary.
 
