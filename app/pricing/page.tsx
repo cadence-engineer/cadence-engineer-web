@@ -21,16 +21,11 @@ export default function PricingPage() {
 
         <div className="bg-white px-8 py-8 md:p-10">
           <article className="mx-auto max-w-2xl rounded-2xl bg-white p-8 text-center">
-            <div className="mb-5 flex items-end justify-center gap-2">
-              <span className="text-7xl font-black leading-none text-black md:text-8xl">
-                ??
-              </span>
-              <span className="text-7xl font-black leading-none text-black md:text-8xl">
-                €
-              </span>
-              <span className="pb-1 text-2xl font-bold leading-none text-black md:text-3xl">
-                /month
-              </span>
+            <div className="mb-5">
+              <p className="text-7xl font-black leading-none text-black md:text-8xl">TBD</p>
+              <p className="mt-2 text-base font-semibold text-neutral-600 md:text-lg">
+                Pricing will be announced soon.
+              </p>
             </div>
             <Link
               href="/sign-in"
