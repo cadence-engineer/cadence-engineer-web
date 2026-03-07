@@ -9,9 +9,9 @@ export const metadata: Metadata = {
   title: "Cadence Engineer",
   description: "Cadence Engineer web app",
   icons: {
-    icon: [{ url: "/cadence-logo.svg", type: "image/svg+xml" }],
-    shortcut: "/cadence-logo.svg",
-    apple: "/cadence-logo.svg",
+    icon: [{ url: "/cadence-icon.svg", type: "image/svg+xml" }],
+    shortcut: "/cadence-icon.svg",
+    apple: "/cadence-icon.svg",
   },
 };
 
