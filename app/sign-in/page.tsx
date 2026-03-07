@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { LogoGithub } from "geist/icons";
 
@@ -21,7 +21,7 @@ function getErrorMessage(error: string | null): string | null {
   }
 }
 
-export default function SignInPage() {
+function SignInContent() {
   const query = useSearchParams();
 
   const errorMessage = useMemo(() => getErrorMessage(query.get("error")), [query]);
@@ -50,5 +50,13 @@ export default function SignInPage() {
         </a>
       </section>
     </main>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<main className="flex h-full items-center justify-center bg-transparent px-6 py-8 md:px-8 md:py-10" />}>
+      <SignInContent />
+    </Suspense>
   );
 }

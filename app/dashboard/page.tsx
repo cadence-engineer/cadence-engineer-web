@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { logoutCurrentSession } from "@/lib/api/auth-client";
 
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter();
   const query = useSearchParams();
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -73,5 +73,13 @@ export default function DashboardPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<main className="h-full bg-transparent px-6 py-8 md:px-8 md:py-10" />}>
+      <DashboardContent />
+    </Suspense>
   );
 }
