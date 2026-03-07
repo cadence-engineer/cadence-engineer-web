@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 import { Header } from "./components/header";
 import { Footer } from "./components/footer";
 import { LandingNodeBackground } from "./components/landing-node-background";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Cadence Engineer",
@@ -27,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} relative flex min-h-screen flex-col antialiased`}>
+      <body className={`${GeistSans.variable} relative flex min-h-screen flex-col antialiased`}>
         <LandingNodeBackground />
         <div className="relative z-10 flex min-h-screen flex-col">
           <Header />

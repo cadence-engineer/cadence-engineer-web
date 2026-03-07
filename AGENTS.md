@@ -22,6 +22,7 @@ Agents working here should prioritize:
 - Dev server: `pnpm dev`
 - Lint: `pnpm lint`
 - Build: `pnpm build`
+- Build fallback (if `pnpm build` fails in the environment): `pnpm build:webpack`
 - Start production build: `pnpm start`
 
 ## API Integration Rules
@@ -64,7 +65,7 @@ Typical local backend URL is `http://localhost:8080` (adjust if your Vapor app r
 ## Change Guidelines For Agents
 1. Before editing, inspect existing patterns in nearby files.
 2. Make the smallest change that satisfies the request.
-3. Run `pnpm run lint` and `pnpm run build` before finishing.
+3. Run `pnpm run lint` and `pnpm run build` before finishing. If `pnpm run build` fails due environment/tooling restrictions, run `pnpm run build:webpack`.
 4. If you introduce new env vars or scripts, update `README.md`.
 5. Do not add dependencies unless they are clearly necessary.
 
@@ -78,5 +79,5 @@ Typical local backend URL is `http://localhost:8080` (adjust if your Vapor app r
 - Feature works against the Vapor backend.
 - Types are correct and no TypeScript errors are introduced.
 - `pnpm run lint` passes.
-- `pnpm run build` passes.
+- `pnpm run build` passes. If blocked by environment restrictions, `pnpm run build:webpack` passes.
 - Any new setup requirements are documented.
