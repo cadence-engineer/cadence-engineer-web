@@ -5,9 +5,14 @@ export function Footer() {
     <footer className="bg-transparent px-6 py-4 md:px-8">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 text-sm text-black">
         <p className="text-[#FF2D55]">© {new Date().getFullYear()} Cadence Engineer</p>
-        <Link href="/cookies" className="font-medium text-[#FF2D55] hover:text-[#E60045]">
-          Cookies
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/impressum" className="font-medium text-[#FF2D55] hover:text-[#E60045]">
+            Impressum
+          </Link>
+          <Link href="/cookies" className="font-medium text-[#FF2D55] hover:text-[#E60045]">
+            Cookies
+          </Link>
+        </div>
       </div>
     </footer>
   );
