@@ -44,6 +44,14 @@ function DashboardContent() {
             {isSigningOut ? "Signing out..." : "Sign out"}
           </button>
         </div>
+        <div className="mb-8">
+          <a
+            href="/setup"
+            className="inline-flex rounded-lg bg-[#FF2D55] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#E60045]"
+          >
+            Setup
+          </a>
+        </div>
 
         <div className="grid gap-6 md:grid-cols-3">
           <article className="rounded-xl bg-[#FF2D55] p-6 text-white shadow-[0_10px_24px_rgba(0,0,0,0.2)]">

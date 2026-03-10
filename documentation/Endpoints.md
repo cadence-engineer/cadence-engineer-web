@@ -121,11 +121,13 @@ Exchanges a GitHub OAuth `code`, resolves or creates the internal Cadence user, 
 ## `GET /v1/organizations`
 
 ### What it does
-Returns all GitHub organizations for the authenticated Cadence user.
+Returns only GitHub organizations for the authenticated Cadence user
+that have GitHub app installation `2996623`.
 
 ### What it needs
 - Bearer auth with a Cadence JWT
-- The authenticated user must have a stored GitHub access token
+- If the authenticated user has no stored GitHub access token,
+  the endpoint redirects to `/auth/github`
 - No request body
 
 ### Headers example
@@ -137,7 +139,7 @@ Authorization: Bearer <cadence_access_token>
 ### What it returns
 - `200 OK`
 - JSON response body:
-  - `organizations` (array)
+  - `organizations` (array, filtered to orgs that have installation `2996623`)
     - `id` (int)
     - `name` (string)
     - `url` (string)
@@ -156,15 +158,11 @@ Authorization: Bearer <cadence_access_token>
 }
 ```
 
-### Common error example
+### Redirect example (missing GitHub access token)
 
-```json
-{
-  "error": true,
-  "runId": null,
-  "schemaVersion": "1.0.0",
-  "reason": "Missing GitHub access token for the authenticated user."
-}
+```http
+HTTP/1.1 307 Temporary Redirect
+Location: /auth/github
 ```
 
 ---
