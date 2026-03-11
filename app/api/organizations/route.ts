@@ -3,14 +3,17 @@ import { fetchCadenceApi } from "@/lib/server/cadence-api";
 import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
 
 type Organization = {
-  id: number;
-  name: string;
-  url: string;
+  login: string;
 };
 
-type OrganizationsResponse = {
-  organizations: Organization[];
-};
+function isOrganization(value: unknown): value is Organization {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const maybeOrganization = value as Record<string, unknown>;
+  return typeof maybeOrganization.login === "string";
+}
 
 export async function GET(request: NextRequest) {
   const accessToken = request.cookies.get(AUTH_COOKIE_NAMES.access)?.value;
@@ -20,7 +23,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const response = await fetchCadenceApi("/v1/organizations", {
+    const response = await fetchCadenceApi("/v1/available-organizations", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -52,24 +55,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const payload = (await response.json()) as OrganizationsResponse;
-    const organizations = Array.isArray(payload.organizations)
-      ? payload.organizations
-          .filter((organization) => {
-            if (!organization || typeof organization !== "object") {
-              return false;
-            }
-
-            return (
-              typeof organization.id === "number" &&
-              typeof organization.name === "string" &&
-              typeof organization.url === "string"
-            );
-          })
+    const payload = (await response.json()) as unknown;
+    const organizations = Array.isArray(payload)
+      ? payload
+          .filter(isOrganization)
           .map((organization) => ({
-            id: organization.id,
-            name: organization.name,
-            url: organization.url,
+            login: organization.login,
           }))
       : [];
 

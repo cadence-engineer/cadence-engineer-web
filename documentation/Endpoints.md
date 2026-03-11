@@ -118,7 +118,7 @@ Exchanges a GitHub OAuth `code`, resolves or creates the internal Cadence user, 
 
 ---
 
-## `GET /v1/organizations`
+## `GET /v1/available-organizations`
 
 ### What it does
 Returns only GitHub organizations for the authenticated Cadence user
@@ -126,8 +126,50 @@ that have GitHub app installation `2996623`.
 
 ### What it needs
 - Bearer auth with a Cadence JWT
-- If the authenticated user has no stored GitHub access token,
-  the endpoint redirects to `/auth/github`
+- The authenticated user must have a stored GitHub access token
+- No request body
+
+### Headers example
+
+```http
+Authorization: Bearer <cadence_access_token>
+```
+
+### What it returns
+- `200 OK`
+- JSON response body: array (filtered to orgs that have installation `2996623`)
+  - `login` (string)
+
+### Response example
+
+```json
+[
+  {
+    "login": "cadence-engineer"
+  }
+]
+```
+
+### Common error example (missing GitHub access token)
+
+```json
+{
+  "error": true,
+  "runId": null,
+  "schemaVersion": "1.0.0",
+  "reason": "Missing GitHub access token for the authenticated user."
+}
+```
+
+---
+
+## `GET /v1/organization`
+
+### What it does
+Returns the selected organization of the authenticated Cadence user.
+
+### What it needs
+- Bearer auth with a Cadence JWT
 - No request body
 
 ### Headers example
@@ -139,22 +181,65 @@ Authorization: Bearer <cadence_access_token>
 ### What it returns
 - `200 OK`
 - JSON response body:
-  - `organizations` (array, filtered to orgs that have installation `2996623`)
-    - `id` (int)
-    - `name` (string)
-    - `url` (string)
+  - `login` (string)
 
 ### Response example
 
 ```json
 {
-  "organizations": [
-    {
-      "id": 12345,
-      "name": "cadence-engineer",
-      "url": "https://api.github.com/orgs/cadence-engineer"
-    }
-  ]
+  "login": "cadence-engineer"
+}
+```
+
+### Common error example
+
+```json
+{
+  "error": true,
+  "runId": null,
+  "schemaVersion": "1.0.0",
+  "reason": "No organization selected for the authenticated user."
+}
+```
+
+---
+
+## `PUT /v1/organization`
+
+### What it does
+Sets the selected organization for the authenticated Cadence user from a GitHub organization login.
+
+### What it needs
+- Bearer auth with a Cadence JWT
+- If the authenticated user has no stored GitHub access token,
+  the endpoint redirects to `/auth/github`
+- JSON request body:
+  - `login` (string, required, non-empty)
+
+### Headers example
+
+```http
+Authorization: Bearer <cadence_access_token>
+```
+
+### Request example
+
+```json
+{
+  "login": "cadence-engineer"
+}
+```
+
+### What it returns
+- `200 OK`
+- JSON response body:
+  - `login` (string)
+
+### Response example
+
+```json
+{
+  "login": "cadence-engineer"
 }
 ```
 

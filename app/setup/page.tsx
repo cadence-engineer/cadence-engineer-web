@@ -1,19 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   fetchOrganizations,
-  type Organization,
+  fetchSelectedOrganizationLogin,
+  updateSelectedOrganization,
 } from "@/lib/api/organizations-client";
 
 const GITHUB_APP_INSTALL_URL =
   "https://github.com/apps/cadence-engineer/installations/new";
 
 export default function SetupPage() {
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [selectedOrganizationId, setSelectedOrganizationId] = useState<number | null>(
+  const router = useRouter();
+  const [organizations, setOrganizations] = useState<string[]>([]);
+  const [selectedOrganizationLogin, setSelectedOrganizationLogin] = useState<string | null>(
     null,
   );
+  const [isUpdatingSelection, setIsUpdatingSelection] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -23,9 +27,14 @@ export default function SetupPage() {
       setErrorMessage(null);
 
       try {
-        const nextOrganizations = await fetchOrganizations();
-        setOrganizations(nextOrganizations);
-        setSelectedOrganizationId(nextOrganizations[0]?.id ?? null);
+        const [availableOrganizations, selectedLogin] = await Promise.all([
+          fetchOrganizations(),
+          fetchSelectedOrganizationLogin(),
+        ]);
+        setOrganizations(
+          availableOrganizations.map((organization) => organization.login),
+        );
+        setSelectedOrganizationLogin(selectedLogin);
       } catch (error) {
         console.error("Failed loading organizations", error);
         setErrorMessage("Could not load organizations. Please try again.");
@@ -36,6 +45,34 @@ export default function SetupPage() {
 
     void loadOrganizations();
   }, []);
+
+  function handleSelectOrganization(login: string) {
+    if (isUpdatingSelection || selectedOrganizationLogin === login) {
+      return;
+    }
+
+    setSelectedOrganizationLogin(login);
+    setErrorMessage(null);
+  }
+
+  async function handleDone() {
+    if (!selectedOrganizationLogin || isUpdatingSelection) {
+      return;
+    }
+
+    setIsUpdatingSelection(true);
+    setErrorMessage(null);
+
+    try {
+      await updateSelectedOrganization(selectedOrganizationLogin);
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Failed saving selected organization", error);
+      setErrorMessage("Could not save selected organization. Please try again.");
+    } finally {
+      setIsUpdatingSelection(false);
+    }
+  }
 
   return (
     <main className="h-full bg-transparent px-6 py-8 md:px-8 md:py-10">
@@ -68,36 +105,50 @@ export default function SetupPage() {
               href={GITHUB_APP_INSTALL_URL}
               className="inline-flex items-center justify-center rounded-lg bg-[#FF2D55] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#E60045]"
             >
-              Connect GitHub organization
+              Add GitHub organization
             </a>
           </div>
         ) : null}
 
         {!isLoading && !errorMessage && organizations.length > 0 ? (
-          <div className="space-y-3">
-            {organizations.map((organization) => {
-              const isSelected = selectedOrganizationId === organization.id;
+          <div className="space-y-4">
+            <div className="space-y-3">
+              {organizations.map((organizationLogin) => {
+                const isSelected = selectedOrganizationLogin === organizationLogin;
 
-              return (
-                <button
-                  key={organization.id}
-                  type="button"
-                  onClick={() => setSelectedOrganizationId(organization.id)}
-                  className={`w-full rounded-xl border p-4 text-left transition ${
-                    isSelected
-                      ? "border-[#FF2D55] bg-[#FFF4F7]"
-                      : "border-black/10 bg-white hover:border-[#FF2D55]/60"
-                  }`}
-                >
-                  <p className="text-base font-semibold text-black">
-                    {organization.name}
-                  </p>
-                  <p className="mt-1 text-sm text-black/70">
-                    {organization.url}
-                  </p>
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={organizationLogin}
+                    type="button"
+                    onClick={() => void handleSelectOrganization(organizationLogin)}
+                    disabled={isUpdatingSelection}
+                    className={`w-full rounded-xl border p-4 text-left transition ${
+                      isSelected
+                        ? "border-[#FF2D55] bg-[#FFF4F7]"
+                        : "border-black/10 bg-white hover:border-[#FF2D55]/60"
+                    }`}
+                  >
+                    <p className="text-base font-semibold text-black">
+                      {organizationLogin}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              onClick={() => void handleDone()}
+              disabled={!selectedOrganizationLogin || isUpdatingSelection}
+              className="flex w-full items-center justify-center rounded-lg bg-[#FF2D55] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#E60045] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {isUpdatingSelection ? "Saving..." : "Done"}
+            </button>
+            <a
+              href={GITHUB_APP_INSTALL_URL}
+              className="flex w-full items-center justify-center rounded-lg border border-[#FF2D55] bg-transparent px-5 py-3 text-sm font-semibold text-[#FF2D55] transition hover:bg-[#FFF4F7]"
+            >
+              Add GitHub organization
+            </a>
           </div>
         ) : null}
       </section>
