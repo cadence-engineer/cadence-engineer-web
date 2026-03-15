@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       return redirectToSignInWithError(request, "oauth_failed");
     }
 
-    const response = NextResponse.redirect(new URL("/dashboard?auth=success", request.url));
+    const response = NextResponse.redirect(new URL("/?auth=success", request.url));
     response.cookies.delete(AUTH_COOKIE_NAMES.oauthState);
     response.cookies.set(AUTH_COOKIE_NAMES.access, accessToken, {
       httpOnly: true,

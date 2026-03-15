@@ -1,6 +1,21 @@
+import { cookies } from "next/headers";
 import { RotatingAudience } from "./components/rotating-audience";
+import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
+import { DashboardContent } from "./components/dashboard-content";
 
-export default function Home() {
+type HomePageProps = {
+  searchParams: Promise<{ auth?: string }>;
+};
+
+export default async function Home({ searchParams }: HomePageProps) {
+  const cookieStore = await cookies();
+  const { auth } = await searchParams;
+  const isSignedIn = Boolean(cookieStore.get(AUTH_COOKIE_NAMES.access)?.value);
+
+  if (isSignedIn) {
+    return <DashboardContent showAuthSuccess={auth === "success"} />;
+  }
+
   return (
     <main className="flex h-full items-center justify-center bg-transparent px-6 py-8 md:px-8 md:py-10">
       <section className="relative w-full max-w-4xl overflow-hidden rounded-2xl p-8 text-center shadow-[0_14px_40px_rgba(0,0,0,0.18)] md:p-10">
