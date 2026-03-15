@@ -31,10 +31,16 @@ export default function SetupPage() {
           fetchOrganizations(),
           fetchSelectedOrganizationLogin(),
         ]);
-        setOrganizations(
-          availableOrganizations.map((organization) => organization.login),
+        const availableOrganizationLogins = availableOrganizations.map(
+          (organization) => organization.login,
         );
-        setSelectedOrganizationLogin(selectedLogin);
+
+        setOrganizations(availableOrganizationLogins);
+        setSelectedOrganizationLogin(
+          selectedLogin && availableOrganizationLogins.includes(selectedLogin)
+            ? selectedLogin
+            : null,
+        );
       } catch (error) {
         console.error("Failed loading organizations", error);
         setErrorMessage("Could not load organizations. Please try again.");
