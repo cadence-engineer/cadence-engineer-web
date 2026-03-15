@@ -1,47 +1,5 @@
 import Link from "next/link";
-import { dailySummary, type ImpactItem, type SummaryItem } from "@/lib/daily/dummy-summary";
-
-function SummaryList({
-  title,
-  items,
-}: {
-  title: string;
-  items: SummaryItem[];
-}) {
-  return (
-    <article className="rounded-xl border border-black/10 bg-white p-6 shadow-[0_10px_24px_rgba(0,0,0,0.08)]">
-      <h2 className="mb-3 text-lg font-bold text-black">{title}</h2>
-      <ul className="space-y-3">
-        {items.map((item) => (
-          <li key={`${title}-${item.text}`} className="rounded-lg bg-[#FFF2F6] p-3">
-            <p className="text-sm text-black">{item.text}</p>
-            {item.citations.length > 0 ? (
-              <p className="mt-2 text-xs font-semibold text-[#B0173D]">
-                Source: {item.citations.map((citation) => citation.id).join(", ")}
-              </p>
-            ) : null}
-          </li>
-        ))}
-      </ul>
-    </article>
-  );
-}
-
-function ImpactList({ title, items }: { title: string; items: ImpactItem[] }) {
-  return (
-    <article className="rounded-xl border border-black/10 bg-white p-6 shadow-[0_10px_24px_rgba(0,0,0,0.08)]">
-      <h2 className="mb-3 text-lg font-bold text-black">{title}</h2>
-      <ul className="space-y-3">
-        {items.map((item) => (
-          <li key={`${title}-${item.text}`} className="rounded-lg bg-[#F5F7FF] p-3">
-            <p className="text-sm text-black">{item.text}</p>
-            <p className="mt-2 text-xs text-black/70">Basis: {item.basis}</p>
-          </li>
-        ))}
-      </ul>
-    </article>
-  );
-}
+import { dailySummary } from "@/lib/daily/dummy-summary";
 
 export default function DailyPage() {
   return (
@@ -58,23 +16,9 @@ export default function DailyPage() {
         </div>
 
         <article className="rounded-xl bg-[#FFF2F6] p-5">
+          <h2 className="mb-2 text-lg font-bold text-black">Summary</h2>
           <p className="text-base leading-7 text-black">{dailySummary.summary}</p>
         </article>
-
-        <section className="grid gap-6 md:grid-cols-2">
-          <SummaryList title="Key Areas" items={dailySummary.areas} />
-          <SummaryList title="Intent" items={dailySummary.intents} />
-          <SummaryList title="Changes" items={dailySummary.changes} />
-          <SummaryList title="Risks" items={dailySummary.risks.map((risk) => ({
-            text: `${risk.statement} (${risk.severity} • ${risk.category})`,
-            citations: risk.citations,
-          }))} />
-        </section>
-
-        <section className="grid gap-6 md:grid-cols-2">
-          <ImpactList title="Impacts" items={dailySummary.impacts} />
-          <ImpactList title="Implications" items={dailySummary.implications} />
-        </section>
 
         <article className="rounded-xl border border-black/10 bg-white p-6">
           <h2 className="mb-2 text-lg font-bold text-black">Confidence</h2>
