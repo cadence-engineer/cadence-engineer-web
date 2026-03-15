@@ -1,7 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
 
-export function Header() {
+export async function Header() {
+  const cookieStore = await cookies();
+  const isSignedIn = Boolean(cookieStore.get(AUTH_COOKIE_NAMES.access)?.value);
+
   return (
     <header className="bg-transparent px-6 py-4 md:px-8">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4">
@@ -18,14 +23,25 @@ export function Header() {
             priority
           />
         </Link>
-        <nav className="flex items-center gap-6 text-sm font-semibold">
-          <Link href="/pricing" className="text-[#FF2D55] hover:text-[#E60045]">
-            Pricing
-          </Link>
-          <Link href="/sign-in" className="text-[#FF2D55] hover:text-[#E60045]">
-            Sign in
-          </Link>
-        </nav>
+        {isSignedIn ? (
+          <form action="/auth/sign-out" method="post">
+            <button
+              type="submit"
+              className="text-sm font-semibold text-[#FF2D55] hover:text-[#E60045]"
+            >
+              Sign out
+            </button>
+          </form>
+        ) : (
+          <nav className="flex items-center gap-6 text-sm font-semibold">
+            <Link href="/pricing" className="text-[#FF2D55] hover:text-[#E60045]">
+              Pricing
+            </Link>
+            <Link href="/sign-in" className="text-[#FF2D55] hover:text-[#E60045]">
+              Sign in
+            </Link>
+          </nav>
+        )}
       </div>
     </header>
   );
