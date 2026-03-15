@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { logoutCurrentSession } from "@/lib/api/auth-client";
@@ -43,6 +44,14 @@ function DashboardContent() {
           >
             {isSigningOut ? "Signing out..." : "Sign out"}
           </button>
+        </div>
+        <div className="mb-8">
+          <Link
+            href="/setup"
+            className="inline-flex rounded-lg bg-[#FF2D55] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#E60045]"
+          >
+            Setup
+          </Link>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
