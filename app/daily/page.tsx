@@ -48,14 +48,7 @@ export default function DailyPage() {
     <main className="h-full bg-transparent px-6 py-8 md:px-8 md:py-10">
       <section className="mx-auto w-full max-w-5xl space-y-6 rounded-2xl bg-white p-8 shadow-[0_14px_40px_rgba(0,0,0,0.18)] md:p-10">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#B0173D]">
-              Daily Summary
-            </p>
-            <h1 className="text-3xl font-bold tracking-tight text-black">
-              Engineering updates at a glance
-            </h1>
-          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-black">Daily Summary</h1>
           <Link
             href="/"
             className="inline-flex w-fit rounded-lg bg-[#FF2D55] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#E60045]"
