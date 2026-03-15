@@ -48,12 +48,18 @@ export function DashboardContent({ showAuthSuccess }: DashboardContentProps) {
             {isSigningOut ? "Signing out..." : "Sign out"}
           </button>
         </div>
-        <div className="mb-8">
+        <div className="mb-8 flex flex-wrap gap-3">
           <Link
             href="/setup"
             className="inline-flex rounded-lg bg-[#FF2D55] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#E60045]"
           >
             Setup
+          </Link>
+          <Link
+            href="/daily"
+            className="inline-flex rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-black/85"
+          >
+            View daily summary
           </Link>
         </div>
 
