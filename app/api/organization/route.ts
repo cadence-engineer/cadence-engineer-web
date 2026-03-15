@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchCadenceApi } from "@/lib/server/cadence-api";
+import {
+  fetchCadenceApi,
+  getCadenceRedirectDetails,
+} from "@/lib/server/cadence-api";
 import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
 
 type OrganizationResponse = {
@@ -17,6 +20,25 @@ function isOrganizationResponse(value: unknown): value is OrganizationResponse {
 
 function getAccessToken(request: NextRequest): string | null {
   return request.cookies.get(AUTH_COOKIE_NAMES.access)?.value ?? null;
+}
+
+function createRedirectErrorResponse(
+  request: NextRequest,
+  response: Response,
+  reason: string,
+) {
+  const redirectDetails = getCadenceRedirectDetails(request, response);
+
+  return NextResponse.json(
+    {
+      reason,
+      code: redirectDetails.reauthUrl ? "reauth_required" : "upstream_redirect",
+      reauthUrl: redirectDetails.reauthUrl,
+      upstreamLocation: redirectDetails.upstreamLocation,
+      redirectStatus: redirectDetails.status,
+    },
+    { status: 409 },
+  );
 }
 
 export async function GET(request: NextRequest) {
@@ -37,7 +59,11 @@ export async function GET(request: NextRequest) {
     });
 
     if (response.status >= 300 && response.status < 400) {
-      return NextResponse.json({ login: null });
+      return createRedirectErrorResponse(
+        request,
+        response,
+        "Reauthentication required",
+      );
     }
 
     if (!response.ok) {
@@ -123,7 +149,11 @@ export async function PUT(request: NextRequest) {
     });
 
     if (response.status >= 300 && response.status < 400) {
-      return NextResponse.json({ reason: "Failed to update organization" }, { status: 409 });
+      return createRedirectErrorResponse(
+        request,
+        response,
+        "Reauthentication required",
+      );
     }
 
     if (!response.ok) {

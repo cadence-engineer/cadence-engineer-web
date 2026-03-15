@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchCadenceApi } from "@/lib/server/cadence-api";
+import {
+  fetchCadenceApi,
+  getCadenceRedirectDetails,
+} from "@/lib/server/cadence-api";
 import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
 
 type Organization = {
@@ -33,7 +36,18 @@ export async function GET(request: NextRequest) {
     });
 
     if (response.status >= 300 && response.status < 400) {
-      return NextResponse.json({ organizations: [] satisfies Organization[] });
+      const redirectDetails = getCadenceRedirectDetails(request, response);
+
+      return NextResponse.json(
+        {
+          reason: "Reauthentication required",
+          code: redirectDetails.reauthUrl ? "reauth_required" : "upstream_redirect",
+          reauthUrl: redirectDetails.reauthUrl,
+          upstreamLocation: redirectDetails.upstreamLocation,
+          redirectStatus: redirectDetails.status,
+        },
+        { status: 409 },
+      );
     }
 
     if (!response.ok) {

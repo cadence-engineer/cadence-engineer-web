@@ -15,6 +15,47 @@ export function isUnauthorizedError(error: unknown): error is UnauthorizedError 
   return error instanceof UnauthorizedError;
 }
 
+export class ReauthRequiredError extends Error {
+  readonly reauthUrl: string;
+
+  constructor(reauthUrl: string) {
+    super("Reauthentication required");
+    this.name = "ReauthRequiredError";
+    this.reauthUrl = reauthUrl;
+  }
+}
+
+export function isReauthRequiredError(error: unknown): error is ReauthRequiredError {
+  return error instanceof ReauthRequiredError;
+}
+
+type RedirectErrorResponse = {
+  code?: string;
+  reauthUrl?: string;
+};
+
+async function throwIfReauthRequired(response: Response): Promise<void> {
+  if (response.status !== 409) {
+    return;
+  }
+
+  let payload: RedirectErrorResponse | null = null;
+
+  try {
+    payload = (await response.json()) as RedirectErrorResponse;
+  } catch {
+    return;
+  }
+
+  if (
+    payload?.code === "reauth_required" &&
+    typeof payload.reauthUrl === "string" &&
+    payload.reauthUrl.length > 0
+  ) {
+    throw new ReauthRequiredError(payload.reauthUrl);
+  }
+}
+
 type OrganizationsResponse = {
   organizations: Organization[];
 };
@@ -25,6 +66,8 @@ export async function fetchOrganizations(): Promise<Organization[]> {
   if (response.status === 401) {
     throw new UnauthorizedError();
   }
+
+  await throwIfReauthRequired(response);
 
   if (!response.ok) {
     throw new Error(`Organizations request failed with status ${response.status}`);
@@ -44,6 +87,8 @@ export async function fetchSelectedOrganizationLogin(): Promise<string | null> {
   if (response.status === 401) {
     throw new UnauthorizedError();
   }
+
+  await throwIfReauthRequired(response);
 
   if (!response.ok) {
     throw new Error(
@@ -67,6 +112,8 @@ export async function updateSelectedOrganization(login: string): Promise<string>
   if (response.status === 401) {
     throw new UnauthorizedError();
   }
+
+  await throwIfReauthRequired(response);
 
   if (!response.ok) {
     throw new Error(

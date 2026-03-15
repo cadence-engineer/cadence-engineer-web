@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   fetchOrganizations,
   fetchSelectedOrganizationLogin,
+  isReauthRequiredError,
   isUnauthorizedError,
   updateSelectedOrganization,
 } from "@/lib/api/organizations-client";
@@ -48,6 +49,11 @@ export default function SetupPage() {
           return;
         }
 
+        if (isReauthRequiredError(error)) {
+          router.replace(error.reauthUrl);
+          return;
+        }
+
         console.error("Failed loading organizations", error);
         setErrorMessage("Could not load organizations. Please try again.");
       } finally {
@@ -81,6 +87,11 @@ export default function SetupPage() {
     } catch (error) {
       if (isUnauthorizedError(error)) {
         router.replace("/sign-in");
+        return;
+      }
+
+      if (isReauthRequiredError(error)) {
+        router.replace(error.reauthUrl);
         return;
       }
 
