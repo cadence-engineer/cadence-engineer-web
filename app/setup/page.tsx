@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   fetchOrganizations,
   fetchSelectedOrganizationLogin,
+  isUnauthorizedError,
   updateSelectedOrganization,
 } from "@/lib/api/organizations-client";
 
@@ -42,6 +43,11 @@ export default function SetupPage() {
             : null,
         );
       } catch (error) {
+        if (isUnauthorizedError(error)) {
+          router.replace("/sign-in");
+          return;
+        }
+
         console.error("Failed loading organizations", error);
         setErrorMessage("Could not load organizations. Please try again.");
       } finally {
@@ -50,7 +56,7 @@ export default function SetupPage() {
     }
 
     void loadOrganizations();
-  }, []);
+  }, [router]);
 
   function handleSelectOrganization(login: string) {
     if (isUpdatingSelection || selectedOrganizationLogin === login) {
@@ -73,6 +79,11 @@ export default function SetupPage() {
       await updateSelectedOrganization(selectedOrganizationLogin);
       router.push("/dashboard");
     } catch (error) {
+      if (isUnauthorizedError(error)) {
+        router.replace("/sign-in");
+        return;
+      }
+
       console.error("Failed saving selected organization", error);
       setErrorMessage("Could not save selected organization. Please try again.");
     } finally {

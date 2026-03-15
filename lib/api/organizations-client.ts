@@ -4,6 +4,17 @@ export type Organization = {
   login: string;
 };
 
+export class UnauthorizedError extends Error {
+  constructor() {
+    super("Unauthorized");
+    this.name = "UnauthorizedError";
+  }
+}
+
+export function isUnauthorizedError(error: unknown): error is UnauthorizedError {
+  return error instanceof UnauthorizedError;
+}
+
 type OrganizationsResponse = {
   organizations: Organization[];
 };
@@ -12,7 +23,7 @@ export async function fetchOrganizations(): Promise<Organization[]> {
   const response = await fetchBff("/api/organizations", { method: "GET" });
 
   if (response.status === 401) {
-    throw new Error("Unauthorized");
+    throw new UnauthorizedError();
   }
 
   if (!response.ok) {
@@ -31,7 +42,7 @@ export async function fetchSelectedOrganizationLogin(): Promise<string | null> {
   const response = await fetchBff("/api/organization", { method: "GET" });
 
   if (response.status === 401) {
-    throw new Error("Unauthorized");
+    throw new UnauthorizedError();
   }
 
   if (!response.ok) {
@@ -54,7 +65,7 @@ export async function updateSelectedOrganization(login: string): Promise<string>
   });
 
   if (response.status === 401) {
-    throw new Error("Unauthorized");
+    throw new UnauthorizedError();
   }
 
   if (!response.ok) {
