@@ -78,6 +78,10 @@ Hello, world!
 
 ### What it does
 Exchanges a GitHub OAuth `code`, resolves or creates the internal Cadence user, and returns a Cadence access token.
+The returned Cadence JWT includes the GitHub OAuth access token claim for downstream GitHub requests.
+Only allowlisted GitHub IDs can authenticate:
+- `47605786`
+- `265279238`
 
 ### What it needs
 - No Cadence auth required (public endpoint)
@@ -116,17 +120,26 @@ Exchanges a GitHub OAuth `code`, resolves or creates the internal Cadence user, 
 }
 ```
 
+### Common error example (GitHub account not allowlisted)
+
+```json
+{
+  "error": true,
+  "runId": null,
+  "schemaVersion": "1.0.0",
+  "reason": "GitHub account is not allowlisted."
+}
+```
+
 ---
 
-## `GET /v1/available-organizations`
+## `GET /v1/user`
 
 ### What it does
-Returns only GitHub organizations for the authenticated Cadence user
-that have GitHub app installation `2996623`.
+Returns the authenticated Cadence user profile.
 
 ### What it needs
 - Bearer auth with a Cadence JWT
-- The authenticated user must have a stored GitHub access token
 - No request body
 
 ### Headers example
@@ -137,7 +150,76 @@ Authorization: Bearer <cadence_access_token>
 
 ### What it returns
 - `200 OK`
-- JSON response body: array (filtered to orgs that have installation `2996623`)
+- JSON response body:
+  - `id` (UUID)
+  - `name` (string)
+  - `email` (string or null)
+  - `githubID` (integer or null)
+
+### Response example
+
+```json
+{
+  "id": "8cc5c9aa-2e73-4e11-b84a-7e457ad01f95",
+  "name": "Cadence User",
+  "email": "cadence@example.com",
+  "githubID": 47605786
+}
+```
+
+---
+
+## `GET /v1/user/name`
+
+### What it does
+Returns only the authenticated Cadence user's name.
+
+### What it needs
+- Bearer auth with a Cadence JWT
+- No request body
+
+### Headers example
+
+```http
+Authorization: Bearer <cadence_access_token>
+```
+
+### What it returns
+- `200 OK`
+- JSON response body:
+  - `name` (string)
+
+### Response example
+
+```json
+{
+  "name": "Cadence User"
+}
+```
+
+---
+
+## `GET /v1/available-organizations`
+
+### What it does
+Returns only GitHub organizations for the authenticated Cadence user
+where the Cadence GitHub app (`cadence-engineer`) is installed and visible
+to that user.
+
+### What it needs
+- Bearer auth with a Cadence JWT
+- The Cadence JWT must include a GitHub access token claim
+- No request body
+
+### Headers example
+
+```http
+Authorization: Bearer <cadence_access_token>
+```
+
+### What it returns
+- `200 OK`
+- JSON response body: array (filtered to orgs with installed app `cadence-engineer`)
   - `login` (string)
 
 ### Response example
@@ -150,7 +232,7 @@ Authorization: Bearer <cadence_access_token>
 ]
 ```
 
-### Common error example (missing GitHub access token)
+### Common error example (missing GitHub access token claim)
 
 ```json
 {
@@ -208,11 +290,14 @@ Authorization: Bearer <cadence_access_token>
 
 ### What it does
 Sets the selected organization for the authenticated Cadence user from a GitHub organization login.
+During this operation, the API also resolves the `cadence-engineer` app installation for that organization,
+creates a GitHub installation access token, and stores it on the organization installation record.
 
 ### What it needs
 - Bearer auth with a Cadence JWT
-- If the authenticated user has no stored GitHub access token,
+- If the Cadence JWT has no GitHub access token claim,
   the endpoint redirects to `/auth/github`
+- The selected organization must have the `cadence-engineer` GitHub app installed
 - JSON request body:
   - `login` (string, required, non-empty)
 
@@ -248,6 +333,28 @@ Authorization: Bearer <cadence_access_token>
 ```http
 HTTP/1.1 307 Temporary Redirect
 Location: /auth/github
+```
+
+### Validation error example (empty login)
+
+```json
+{
+  "error": true,
+  "runId": null,
+  "schemaVersion": "1.0.0",
+  "reason": "login is empty"
+}
+```
+
+### Common error example (app not installed)
+
+```json
+{
+  "error": true,
+  "runId": null,
+  "schemaVersion": "1.0.0",
+  "reason": "GitHub app 'cadence-engineer' is not installed for organization 'acme'."
+}
 ```
 
 ---
