@@ -17,7 +17,12 @@ function isUserNameResponse(value: unknown): value is UserNameResponse {
   return typeof maybeUserName.name === "string";
 }
 
-async function getDisplayName(accessToken: string): Promise<string> {
+type HeaderSessionIdentity = {
+  isSignedIn: boolean;
+  displayName: string;
+};
+
+async function getSessionIdentity(accessToken: string): Promise<HeaderSessionIdentity> {
   try {
     const response = await fetchCadenceApi("/v1/user/name", {
       method: "GET",
@@ -27,32 +32,53 @@ async function getDisplayName(accessToken: string): Promise<string> {
       },
     });
 
+    if (response.status === 401 || response.status === 403) {
+      return {
+        isSignedIn: false,
+        displayName: "",
+      };
+    }
+
     if (!response.ok) {
       console.error("Failed to fetch user name for header", {
         status: response.status,
       });
-      return "Account";
+      return {
+        isSignedIn: true,
+        displayName: "Account",
+      };
     }
 
     const payload = (await response.json()) as unknown;
     if (!isUserNameResponse(payload)) {
       console.error("Invalid user name payload shape for header", payload);
-      return "Account";
+      return {
+        isSignedIn: true,
+        displayName: "Account",
+      };
     }
 
     const normalizedName = payload.name.trim();
-    return normalizedName.length > 0 ? normalizedName : "Account";
+    return {
+      isSignedIn: true,
+      displayName: normalizedName.length > 0 ? normalizedName : "Account",
+    };
   } catch (error) {
     console.error("Failed to fetch user name for header", error);
-    return "Account";
+    return {
+      isSignedIn: true,
+      displayName: "Account",
+    };
   }
 }
 
 export async function Header() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get(AUTH_COOKIE_NAMES.access)?.value;
-  const isSignedIn = Boolean(accessToken);
-  const displayName = accessToken ? await getDisplayName(accessToken) : "";
+  const sessionIdentity = accessToken
+    ? await getSessionIdentity(accessToken)
+    : { isSignedIn: false, displayName: "" };
+  const { isSignedIn, displayName } = sessionIdentity;
 
   return (
     <header className="bg-transparent px-6 py-4 md:px-8">
