@@ -1,55 +1,58 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { fetchCadenceApi } from "@/lib/server/cadence-api";
 import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
 
-type JwtPayload = {
-  name?: unknown;
-  preferred_username?: unknown;
-  login?: unknown;
-  given_name?: unknown;
+type UserNameResponse = {
+  name: string;
 };
 
-function decodeJwtPayload(token: string): JwtPayload | null {
-  const parts = token.split(".");
-  if (parts.length < 2) {
-    return null;
+function isUserNameResponse(value: unknown): value is UserNameResponse {
+  if (typeof value !== "object" || value === null) {
+    return false;
   }
 
-  const payloadSegment = parts[1];
-  const normalized = payloadSegment.replace(/-/g, "+").replace(/_/g, "/");
-  const padLength = (4 - (normalized.length % 4)) % 4;
-  const padded = normalized.padEnd(normalized.length + padLength, "=");
-
-  try {
-    const json = Buffer.from(padded, "base64").toString("utf8");
-    return JSON.parse(json) as JwtPayload;
-  } catch {
-    return null;
-  }
+  const maybeUserName = value as Record<string, unknown>;
+  return typeof maybeUserName.name === "string";
 }
 
-function getDisplayName(accessToken: string): string {
-  const payload = decodeJwtPayload(accessToken);
-  const possibleName =
-    payload?.name ??
-    payload?.preferred_username ??
-    payload?.login ??
-    payload?.given_name;
+async function getDisplayName(accessToken: string): Promise<string> {
+  try {
+    const response = await fetchCadenceApi("/v1/user/name", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: "application/json",
+      },
+    });
 
-  if (typeof possibleName !== "string") {
+    if (!response.ok) {
+      console.error("Failed to fetch user name for header", {
+        status: response.status,
+      });
+      return "Account";
+    }
+
+    const payload = (await response.json()) as unknown;
+    if (!isUserNameResponse(payload)) {
+      console.error("Invalid user name payload shape for header", payload);
+      return "Account";
+    }
+
+    const normalizedName = payload.name.trim();
+    return normalizedName.length > 0 ? normalizedName : "Account";
+  } catch (error) {
+    console.error("Failed to fetch user name for header", error);
     return "Account";
   }
-
-  const normalizedName = possibleName.trim();
-  return normalizedName.length > 0 ? normalizedName : "Account";
 }
 
 export async function Header() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get(AUTH_COOKIE_NAMES.access)?.value;
   const isSignedIn = Boolean(accessToken);
-  const displayName = accessToken ? getDisplayName(accessToken) : "";
+  const displayName = accessToken ? await getDisplayName(accessToken) : "";
 
   return (
     <header className="bg-transparent px-6 py-4 md:px-8">
