@@ -15,7 +15,8 @@ Lists daily summaries for the authenticated user's selected organization.
 - JSON array response body:
   - `id` (UUID)
   - `day` (string, `YYYY-MM-DD`)
-  - `summary` (string)
+  - `title` (string)
+  - `text` (string or null)
   - `changes` (array or null)
   - `intents` (array or null)
   - `areas` (array or null)
@@ -31,7 +32,8 @@ Lists daily summaries for the authenticated user's selected organization.
   {
     "id": "8cc5c9aa-2e73-4e11-b84a-7e457ad01f95",
     "day": "2026-03-10",
-    "summary": "Two pull requests were merged for the authenticated organization.",
+    "title": "Daily Summary",
+    "text": "Two pull requests were merged for the authenticated organization.",
     "changes": [],
     "intents": [],
     "areas": [],
@@ -61,7 +63,8 @@ Returns a single daily summary for the authenticated user's selected organizatio
 - JSON response body:
   - `id` (UUID)
   - `day` (string, `YYYY-MM-DD`)
-  - `summary` (string)
+  - `title` (string)
+  - `text` (string or null)
   - `changes` (array or null)
   - `intents` (array or null)
   - `areas` (array or null)
@@ -76,7 +79,8 @@ Returns a single daily summary for the authenticated user's selected organizatio
 {
   "id": "8cc5c9aa-2e73-4e11-b84a-7e457ad01f95",
   "day": "2026-03-10",
-  "summary": "Two pull requests were merged for the authenticated organization.",
+  "title": "Daily Summary",
+  "text": "Two pull requests were merged for the authenticated organization.",
   "changes": [],
   "intents": [],
   "areas": [],
@@ -103,11 +107,11 @@ Returns a single daily summary for the authenticated user's selected organizatio
 ## `POST /v1/dailies`
 
 ### What it does
-Generates or resolves a daily summary artifact for the authenticated user's selected organization.
+Validates the request shape, but daily generation is currently not exposed here.
+This endpoint always returns `501 Not Implemented` because daily generation is handled by setup.
 
 ### What it needs
 - Bearer auth with a Cadence JWT
-- Authenticated Cadence user must have a selected organization
 - JSON request body:
   - `day` (string, required, format `YYYY-MM-DD`)
 
@@ -120,16 +124,7 @@ Generates or resolves a daily summary artifact for the authenticated user's sele
 ```
 
 ### What it returns
-- `200 OK`
-- No JSON response body
-- Response header: `X-Run-Id: <uuid>`
-
-### Response example
-
-```http
-HTTP/1.1 200 OK
-X-Run-Id: 8CC5C9AA-2E73-4E11-B84A-7E457AD01F95
-```
+- `501 Not Implemented`
 
 ### Common error example
 
@@ -138,6 +133,6 @@ X-Run-Id: 8CC5C9AA-2E73-4E11-B84A-7E457AD01F95
   "error": true,
   "runId": "8CC5C9AA-2E73-4E11-B84A-7E457AD01F95",
   "schemaVersion": "1.0.0",
-  "reason": "Invalid day '2026/03/10'. Expected format: YYYY-MM-DD."
+  "reason": "Daily generation is currently handled by setup."
 }
 ```

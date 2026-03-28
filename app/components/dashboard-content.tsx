@@ -7,9 +7,13 @@ import { logoutCurrentSession } from "@/lib/api/auth-client";
 
 type DashboardContentProps = {
   showAuthSuccess: boolean;
+  showSetupButton: boolean;
 };
 
-export function DashboardContent({ showAuthSuccess }: DashboardContentProps) {
+export function DashboardContent({
+  showAuthSuccess,
+  showSetupButton,
+}: DashboardContentProps) {
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -49,12 +53,14 @@ export function DashboardContent({ showAuthSuccess }: DashboardContentProps) {
           </button>
         </div>
         <div className="mb-8 flex flex-wrap gap-3">
-          <Link
-            href="/setup"
-            className="inline-flex rounded-lg bg-[#FF2D55] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#E60045]"
-          >
-            Setup
-          </Link>
+          {showSetupButton ? (
+            <Link
+              href="/setup"
+              className="inline-flex rounded-lg bg-[#FF2D55] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#E60045]"
+            >
+              Setup
+            </Link>
+          ) : null}
           <Link
             href="/daily"
             className="inline-flex rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-black/85"

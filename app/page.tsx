@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { RotatingAudience } from "./components/rotating-audience";
 import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
 import { DashboardContent } from "./components/dashboard-content";
+import { shouldShowSetupButton } from "@/lib/server/setup";
 
 type HomePageProps = {
   searchParams: Promise<{ auth?: string }>;
@@ -10,10 +11,16 @@ type HomePageProps = {
 export default async function Home({ searchParams }: HomePageProps) {
   const cookieStore = await cookies();
   const { auth } = await searchParams;
-  const isSignedIn = Boolean(cookieStore.get(AUTH_COOKIE_NAMES.access)?.value);
+  const accessToken = cookieStore.get(AUTH_COOKIE_NAMES.access)?.value ?? null;
 
-  if (isSignedIn) {
-    return <DashboardContent showAuthSuccess={auth === "success"} />;
+  if (accessToken) {
+    const showSetupButton = await shouldShowSetupButton(accessToken);
+    return (
+      <DashboardContent
+        showAuthSuccess={auth === "success"}
+        showSetupButton={showSetupButton}
+      />
+    );
   }
 
   return (

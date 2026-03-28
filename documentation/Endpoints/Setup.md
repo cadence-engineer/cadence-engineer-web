@@ -5,14 +5,14 @@
 ### What it does
 Performs the authenticated user's one-time organization setup from a GitHub organization login.
 The endpoint resolves the `cadence-engineer` GitHub app installation for the organization, stores the installation access token,
-assigns the organization to the user, and starts a background import that loads accessible repositories,
-imports merged pull requests, and generates summaries asynchronously.
-If setup is already running or has already completed successfully for that organization, the endpoint returns `409 Conflict`.
+assigns the organization to the user, creates `Daily` records for the last 7 UTC days,
+and starts summarizing those dailies asynchronously in a background task.
 
 ### What it needs
 - Bearer auth with a Cadence JWT
 - If the Cadence JWT has no GitHub access token claim,
   the endpoint returns `422 Unprocessable Entity`
+- The authenticated user must be a member of the selected GitHub organization
 - The selected organization must have the `cadence-engineer` GitHub app installed
 - JSON request body:
   - `login` (string, required, non-empty)
@@ -32,32 +32,23 @@ Authorization: Bearer <cadence_access_token>
 ```
 
 ### What it returns
-- `202 Accepted` when the background setup has been started
-- JSON response body:
-  - `login` (string)
-  - `status` (`in_progress`, `completed`, or `failed`)
-  - `processed_pull_request_count` (int)
-  - `error` (string, nullable)
+- `202 Accepted`
+- No response body
 
-### In-progress response example
+### Response example
 
-```json
-{
-  "login": "cadence-engineer",
-  "status": "in_progress",
-  "processed_pull_request_count": 12,
-  "error": null
-}
+```http
+HTTP/1.1 202 Accepted
 ```
 
-### Conflict error example (setup already completed)
+### Conflict error example (setup already started)
 
 ```json
 {
   "error": true,
   "runId": null,
   "schemaVersion": "1.0.0",
-  "reason": "Setup has already been completed successfully for organization 'cadence-engineer'."
+  "reason": "Setup has already been started for organization cadence-engineer."
 }
 ```
 
@@ -83,14 +74,14 @@ Authorization: Bearer <cadence_access_token>
 }
 ```
 
-### Conflict error example (setup already in progress)
+### Forbidden error example (not an organization member)
 
 ```json
 {
   "error": true,
   "runId": null,
   "schemaVersion": "1.0.0",
-  "reason": "Setup is already in progress for organization 'cadence-engineer'."
+  "reason": "Authenticated user is not a member of cadence-engineer."
 }
 ```
 
@@ -110,12 +101,12 @@ Authorization: Bearer <cadence_access_token>
 ## `GET /v1/setup`
 
 ### What it does
-Returns the current setup state for the authenticated user's assigned organization.
-If the organization setup is still marked `in_progress`, the endpoint also ensures the background import is enqueued.
+Returns whether the authenticated user's setup has completed, derived from the organization's `Daily` records.
+A processed daily is one whose status is either `summarized` or `empty`.
+Setup is complete once at least 7 processed dailies exist for the organization.
 
 ### What it needs
 - Bearer auth with a Cadence JWT
-- The authenticated user must already have an assigned organization setup
 
 ### Headers example
 
@@ -124,31 +115,33 @@ Authorization: Bearer <cadence_access_token>
 ```
 
 ### What it returns
-- `200 OK`
-- JSON response body:
-  - `login` (string)
-  - `status` (`in_progress`, `completed`, or `failed`)
-  - `processed_pull_request_count` (int)
-  - `error` (string, nullable)
+- `404 Not Found` when fewer than 7 processed dailies exist
+- `204 No Content` when at least 7 processed dailies exist
 
-### Response example
-
-```json
-{
-  "login": "cadence-engineer",
-  "status": "completed",
-  "processed_pull_request_count": 128,
-  "error": null
-}
-```
-
-### Not found error example
+### Not found error example (no organization assigned)
 
 ```json
 {
   "error": true,
   "runId": null,
   "schemaVersion": "1.0.0",
-  "reason": "No setup found for the authenticated user."
+  "reason": "No organization found for the authenticated user."
 }
+```
+
+### Not found error example (setup not complete)
+
+```json
+{
+  "error": true,
+  "runId": null,
+  "schemaVersion": "1.0.0",
+  "reason": "Setup has not completed for the authenticated user."
+}
+```
+
+### Completed response example
+
+```http
+HTTP/1.1 204 No Content
 ```
