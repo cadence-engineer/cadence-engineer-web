@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { fetchCadenceApi } from "@/lib/server/cadence-api";
 import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
+import { UserMenu } from "./user-menu";
 
 type UserNameResponse = {
   name: string;
@@ -97,22 +98,7 @@ export async function Header() {
           />
         </Link>
         {isSignedIn ? (
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-2 shadow-sm">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#FF2D55]/10 text-[#FF2D55]">
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle cx="12" cy="8" r="4" />
-                <path d="M5 20a7 7 0 0 1 14 0" />
-              </svg>
-            </span>
-            <span className="text-sm font-semibold text-black">{displayName}</span>
-          </div>
+          <UserMenu displayName={displayName} />
         ) : (
           <nav className="flex items-center gap-6 text-sm font-semibold">
             <Link href="/pricing" className="text-[#FF2D55] hover:text-[#E60045]">

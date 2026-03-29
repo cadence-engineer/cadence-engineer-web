@@ -1,34 +1,16 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { logoutCurrentSession } from "@/lib/api/auth-client";
-
 type DashboardContentProps = {
   showAuthSuccess: boolean;
-  showSetupButton: boolean;
+  isSetupComplete: boolean;
+  selectedOrganizationLogin: string | null;
 };
 
 export function DashboardContent({
   showAuthSuccess,
-  showSetupButton,
+  isSetupComplete,
+  selectedOrganizationLogin,
 }: DashboardContentProps) {
-  const router = useRouter();
-  const [isSigningOut, setIsSigningOut] = useState(false);
-
-  async function handleSignOut() {
-    setIsSigningOut(true);
-    try {
-      await logoutCurrentSession();
-    } catch (error) {
-      console.error("Logout failed", error);
-    } finally {
-      router.replace("/");
-      router.refresh();
-    }
-  }
-
   return (
     <main className="h-full bg-transparent px-6 py-8 md:px-8 md:py-10">
       <section className="mx-auto w-full max-w-4xl rounded-2xl bg-white p-8 shadow-[0_14px_40px_rgba(0,0,0,0.18)] md:p-10">
@@ -43,58 +25,36 @@ export function DashboardContent({
               Dashboard
             </h1>
           </div>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            disabled={isSigningOut}
-            className="rounded-lg bg-[#FFD6E0] px-4 py-2 text-sm font-semibold text-black transition hover:bg-[#FFB3C4] disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {isSigningOut ? "Signing out..." : "Sign out"}
-          </button>
         </div>
         <div className="mb-8 flex flex-wrap gap-3">
-          {showSetupButton ? (
-            <Link
-              href="/setup"
-              className="inline-flex rounded-lg bg-[#FF2D55] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#E60045]"
-            >
-              Setup
-            </Link>
-          ) : null}
-          <Link
-            href="/daily"
-            className="inline-flex rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-black/85"
-          >
-            View daily summary
-          </Link>
+          <article className="min-w-[280px] flex-1 rounded-2xl border border-black/10 bg-[#FFF7F9] p-5">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#FF2D55]">
+                Organization
+              </h2>
+              <span
+                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
+                  isSetupComplete
+                    ? "bg-[#E8FFEF] text-[#146B2E]"
+                    : "bg-[#FFE8EE] text-[#8A1230]"
+                }`}
+              >
+                {isSetupComplete ? "Setup complete" : "Setup required"}
+              </span>
+            </div>
+            <p className="text-2xl font-bold tracking-tight text-black">
+              {selectedOrganizationLogin ?? "No organization selected"}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-black/70">
+              {selectedOrganizationLogin
+                ? isSetupComplete
+                  ? "Cadence Engineer is connected to this organization."
+                  : "Finish setup to initialize Cadence Engineer for this organization."
+                : "Choose a GitHub organization to initialize Cadence Engineer."}
+            </p>
+          </article>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          <article className="rounded-xl bg-[#FF2D55] p-6 text-white shadow-[0_10px_24px_rgba(0,0,0,0.2)]">
-            <h2 className="mb-1 text-sm font-semibold">
-              API Status
-            </h2>
-            <p className="text-sm">
-              Connect this area to the Vapor backend health endpoint.
-            </p>
-          </article>
-          <article className="rounded-xl bg-[#E60045] p-6 text-white shadow-[0_10px_24px_rgba(0,0,0,0.2)]">
-            <h2 className="mb-1 text-sm font-semibold">
-              Recent Activity
-            </h2>
-            <p className="text-sm">
-              Show latest jobs, agent runs, and engineering updates here.
-            </p>
-          </article>
-          <article className="rounded-xl bg-[#FFD6E0] p-6 text-black shadow-[0_10px_24px_rgba(0,0,0,0.15)]">
-            <h2 className="mb-1 text-sm font-semibold">
-              Team Insights
-            </h2>
-            <p className="text-sm">
-              Surface key metrics from Cadence services and user actions.
-            </p>
-          </article>
-        </div>
       </section>
     </main>
   );

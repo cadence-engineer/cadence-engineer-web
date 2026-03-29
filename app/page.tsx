@@ -1,26 +1,14 @@
 import { cookies } from "next/headers";
 import { RotatingAudience } from "./components/rotating-audience";
 import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
-import { DashboardContent } from "./components/dashboard-content";
-import { shouldShowSetupButton } from "@/lib/server/setup";
+import { DailiesContent } from "./components/dailies-content";
 
-type HomePageProps = {
-  searchParams: Promise<{ auth?: string }>;
-};
-
-export default async function Home({ searchParams }: HomePageProps) {
+export default async function Home() {
   const cookieStore = await cookies();
-  const { auth } = await searchParams;
   const accessToken = cookieStore.get(AUTH_COOKIE_NAMES.access)?.value ?? null;
 
   if (accessToken) {
-    const showSetupButton = await shouldShowSetupButton(accessToken);
-    return (
-      <DashboardContent
-        showAuthSuccess={auth === "success"}
-        showSetupButton={showSetupButton}
-      />
-    );
+    return <DailiesContent />;
   }
 
   return (
