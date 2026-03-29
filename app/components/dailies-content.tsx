@@ -105,12 +105,26 @@ function DailyListItem({ daily }: DailyListItemProps) {
   const empty = isEmptyDaily(daily);
   const disabled = pending || empty;
   const confidenceLabel = daily.confidence?.level?.trim() || null;
+  const confidenceText = pending
+    ? "Pending"
+    : empty
+      ? "Empty"
+      : confidenceLabel ?? "No confidence";
   const content = (
-    <div className="flex h-[8.5rem] flex-col justify-between gap-3 overflow-hidden sm:flex-row sm:items-start">
+    <div className="flex h-[8.5rem] flex-col justify-between gap-3 overflow-hidden">
       <div className="min-w-0 space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#FF2D55]">
-          {formatDailyDate(daily.day)}
-        </p>
+        <div className="flex items-start justify-between gap-3">
+          <p className="min-w-0 text-xs font-semibold uppercase tracking-[0.24em] text-[#FF2D55]">
+            {formatDailyDate(daily.day)}
+          </p>
+          <span
+            className="inline-flex w-fit shrink-0 items-center gap-2 self-start rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
+            style={getConfidencePillStyles(confidenceLabel, disabled)}
+          >
+            {pending ? <LoadingIcon /> : null}
+            {confidenceText}
+          </span>
+        </div>
         <h2
           className={`line-clamp-2 text-xl font-bold ${
             disabled
@@ -132,13 +146,6 @@ function DailyListItem({ daily }: DailyListItemProps) {
               : daily.text?.trim() || "Open this daily to see the full summary."}
         </p>
       </div>
-      <span
-        className="inline-flex w-fit shrink-0 items-center gap-2 self-start rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
-        style={getConfidencePillStyles(confidenceLabel, disabled)}
-      >
-        {pending ? <LoadingIcon /> : null}
-        {pending ? "Pending" : empty ? "Empty" : confidenceLabel ?? "No confidence"}
-      </span>
     </div>
   );
 
