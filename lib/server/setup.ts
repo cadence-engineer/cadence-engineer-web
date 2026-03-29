@@ -3,6 +3,7 @@ import { fetchCadenceApi } from "@/lib/server/cadence-api";
 export type DashboardSetupState = {
   isSetupComplete: boolean;
   selectedOrganizationLogin: string | null;
+  isUnauthorized: boolean;
 };
 
 export async function shouldShowSetupButton(accessToken: string): Promise<boolean> {
@@ -35,18 +36,33 @@ export async function fetchDashboardSetupState(
       }),
     ]);
 
+    if (
+      setupResponse.status === 401 ||
+      setupResponse.status === 403 ||
+      organizationResponse.status === 401 ||
+      organizationResponse.status === 403
+    ) {
+      return {
+        isSetupComplete: false,
+        selectedOrganizationLogin: null,
+        isUnauthorized: true,
+      };
+    }
+
     const selectedOrganizationLogin =
       organizationResponse.ok ? await readOrganizationLogin(organizationResponse) : null;
 
     return {
       isSetupComplete: setupResponse.ok,
       selectedOrganizationLogin,
+      isUnauthorized: false,
     };
   } catch (error) {
     console.error("Failed loading dashboard setup state", error);
     return {
       isSetupComplete: false,
       selectedOrganizationLogin: null,
+      isUnauthorized: false,
     };
   }
 }

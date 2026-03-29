@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getDailySectionItemText } from "@/lib/daily/types";
 import { DailyServerError, fetchServerDaily } from "@/lib/server/dailies";
 
@@ -99,7 +99,11 @@ export default async function DailyDetailPage({ params }: DailyDetailPageProps) 
       </main>
     );
   } catch (error) {
-    if (error instanceof DailyServerError && (error.status === 401 || error.status === 404)) {
+    if (error instanceof DailyServerError && error.status === 401) {
+      redirect("/auth/sign-out");
+    }
+
+    if (error instanceof DailyServerError && error.status === 404) {
       notFound();
     }
 

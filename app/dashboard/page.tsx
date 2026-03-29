@@ -19,8 +19,12 @@ export default async function DashboardPage({
   }
 
   const { auth } = await searchParams;
-  const { isSetupComplete, selectedOrganizationLogin } =
+  const { isSetupComplete, selectedOrganizationLogin, isUnauthorized } =
     await fetchDashboardSetupState(accessToken);
+
+  if (isUnauthorized) {
+    redirect("/auth/sign-out");
+  }
 
   return (
     <DashboardContent

@@ -3,7 +3,10 @@ import {
   fetchCadenceApi,
   getCadenceRedirectDetails,
 } from "@/lib/server/cadence-api";
-import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
+import {
+  AUTH_COOKIE_NAMES,
+  createUnauthorizedResponse,
+} from "@/lib/server/auth-cookies";
 import { isDaily } from "@/lib/daily/types";
 
 type RouteContext = {
@@ -35,7 +38,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
   const accessToken = getAccessToken(request);
 
   if (!accessToken) {
-    return NextResponse.json({ reason: "Unauthorized" }, { status: 401 });
+    return createUnauthorizedResponse();
   }
 
   const { id } = await context.params;
@@ -67,6 +70,10 @@ export async function GET(request: NextRequest, context: RouteContext) {
         status: response.status,
         backendError,
       });
+
+      if (response.status === 401 || response.status === 403) {
+        return createUnauthorizedResponse("Unauthorized", response.status);
+      }
 
       return NextResponse.json(
         { reason: response.status === 404 ? "Daily not found" : "Failed to fetch daily" },

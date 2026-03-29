@@ -3,7 +3,10 @@ import {
   fetchCadenceApi,
   getCadenceRedirectDetails,
 } from "@/lib/server/cadence-api";
-import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
+import {
+  AUTH_COOKIE_NAMES,
+  createUnauthorizedResponse,
+} from "@/lib/server/auth-cookies";
 
 function getAccessToken(request: NextRequest): string | null {
   return request.cookies.get(AUTH_COOKIE_NAMES.access)?.value ?? null;
@@ -48,7 +51,7 @@ export async function GET(request: NextRequest) {
   const accessToken = getAccessToken(request);
 
   if (!accessToken) {
-    return NextResponse.json({ reason: "Unauthorized" }, { status: 401 });
+    return createUnauthorizedResponse();
   }
 
   try {
@@ -81,6 +84,10 @@ export async function GET(request: NextRequest) {
         backendReason,
       });
 
+      if (response.status === 401 || response.status === 403) {
+        return createUnauthorizedResponse("Unauthorized", response.status);
+      }
+
       return NextResponse.json({ reason: backendReason }, { status: response.status });
     }
 
@@ -95,7 +102,7 @@ export async function POST(request: NextRequest) {
   const accessToken = getAccessToken(request);
 
   if (!accessToken) {
-    return NextResponse.json({ reason: "Unauthorized" }, { status: 401 });
+    return createUnauthorizedResponse();
   }
 
   let body: unknown;
@@ -145,6 +152,10 @@ export async function POST(request: NextRequest) {
         status: response.status,
         backendReason,
       });
+
+      if (response.status === 401 || response.status === 403) {
+        return createUnauthorizedResponse("Unauthorized", response.status);
+      }
 
       return NextResponse.json({ reason: backendReason }, { status: response.status });
     }

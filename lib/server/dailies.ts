@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { fetchCadenceApi } from "@/lib/server/cadence-api";
 import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
 import { isDaily, type Daily } from "@/lib/daily/types";
@@ -33,6 +34,10 @@ export async function fetchServerDailies(): Promise<Daily[]> {
     },
   });
 
+  if (response.status === 401 || response.status === 403) {
+    redirect("/auth/sign-out");
+  }
+
   if (!response.ok) {
     throw new DailyServerError("Failed to fetch dailies", response.status);
   }
@@ -55,6 +60,10 @@ export async function fetchServerDaily(id: string): Promise<Daily> {
       Accept: "application/json",
     },
   });
+
+  if (response.status === 401 || response.status === 403) {
+    throw new DailyServerError("Unauthorized", response.status);
+  }
 
   if (!response.ok) {
     throw new DailyServerError("Failed to fetch daily", response.status);
