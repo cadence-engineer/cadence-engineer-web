@@ -111,7 +111,7 @@ function DailyListItem({ daily }: DailyListItemProps) {
       ? "Empty"
       : confidenceLabel ?? "No confidence";
   const content = (
-    <div className="flex h-[8.5rem] flex-col justify-between gap-3 overflow-hidden">
+    <div className="flex flex-col gap-3 overflow-hidden">
       <div className="min-w-0 space-y-2">
         <div className="flex items-start justify-between gap-3">
           <p className="min-w-0 text-xs font-semibold uppercase tracking-[0.24em] text-[#FF2D55]">
