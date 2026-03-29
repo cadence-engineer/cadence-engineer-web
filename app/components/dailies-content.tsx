@@ -106,13 +106,13 @@ function DailyListItem({ daily }: DailyListItemProps) {
   const disabled = pending || empty;
   const confidenceLabel = daily.confidence?.level?.trim() || null;
   const content = (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-      <div className="space-y-2">
+    <div className="flex h-[8.5rem] flex-col justify-between gap-3 overflow-hidden sm:flex-row sm:items-start">
+      <div className="min-w-0 space-y-2">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#FF2D55]">
           {formatDailyDate(daily.day)}
         </p>
         <h2
-          className={`text-xl font-bold ${
+          className={`line-clamp-2 text-xl font-bold ${
             disabled
               ? "text-black/55"
               : "text-black transition group-hover:text-[#C61A44]"
@@ -121,7 +121,7 @@ function DailyListItem({ daily }: DailyListItemProps) {
           {daily.title}
         </h2>
         <p
-          className={`max-w-3xl text-sm leading-6 ${
+          className={`line-clamp-1 max-w-3xl text-sm leading-6 ${
             disabled ? "text-black/45" : "text-black/75"
           }`}
         >
@@ -133,7 +133,7 @@ function DailyListItem({ daily }: DailyListItemProps) {
         </p>
       </div>
       <span
-        className="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
+        className="inline-flex w-fit shrink-0 items-center gap-2 self-start rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
         style={getConfidencePillStyles(confidenceLabel, disabled)}
       >
         {pending ? <LoadingIcon /> : null}
@@ -153,7 +153,7 @@ function DailyListItem({ daily }: DailyListItemProps) {
   return (
     <Link
       href={`/dailies/${daily.id}`}
-      className="group rounded-xl border border-black/10 bg-[#FFF7F9] p-5 transition hover:border-[#FF2D55]/30 hover:bg-white hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
+      className="group block rounded-xl border border-black/10 bg-[#FFF7F9] p-5 transition hover:border-[#FF2D55]/30 hover:bg-white hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
     >
       {content}
     </Link>
