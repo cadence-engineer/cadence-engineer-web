@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageHeader, PageShell, PageSurface } from "@/app/components/page-shell";
 
 export const metadata: Metadata = {
   title: "Contact | Cadence Engineer",
@@ -7,10 +8,10 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <main className="h-full bg-transparent px-6 py-8 md:px-8 md:py-10">
-      <section className="mx-auto w-full max-w-4xl rounded-2xl bg-white p-8 shadow-[0_14px_40px_rgba(0,0,0,0.18)] md:p-10">
-        <h1 className="mb-4 text-3xl font-bold tracking-tight text-black">Contact</h1>
-        <address className="mb-4 not-italic text-black">
+    <PageShell>
+      <PageSurface className="space-y-6">
+        <PageHeader title="Contact" />
+        <address className="not-italic leading-7 text-black/80">
           Dominik Strasser
           <br />
           dominik.strasser@cadence.engineer
@@ -21,7 +22,7 @@ export default function ContactPage() {
           <br />
           Austria
         </address>
-      </section>
-    </main>
+      </PageSurface>
+    </PageShell>
   );
 }

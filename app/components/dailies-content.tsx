@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { isEmptyDaily, isPendingDaily } from "@/lib/daily/types";
 import { fetchServerDailies } from "@/lib/server/dailies";
+import { InfoCard, PageHeader, PageShell, PageSurface } from "./page-shell";
 
 function formatDailyDate(day: string): string {
   const value = new Date(`${day}T00:00:00`);
@@ -28,17 +29,17 @@ export async function DailiesContent({
   const dailies = await fetchServerDailies();
 
   return (
-    <main className="h-full bg-transparent px-6 py-8 md:px-8 md:py-10">
-      <section className="mx-auto w-full max-w-5xl space-y-6 rounded-2xl bg-white p-8 shadow-[0_14px_40px_rgba(0,0,0,0.18)] md:p-10">
-        <h1 className="text-3xl font-bold tracking-tight text-black">{title}</h1>
+    <PageShell>
+      <PageSurface className="space-y-6">
+        <PageHeader title={title} />
 
         {dailies.length === 0 ? (
-          <article className="rounded-xl border border-dashed border-black/15 bg-[#FFF7F9] p-6">
+          <InfoCard className="border-dashed" tone="tinted">
             <h2 className="text-lg font-bold text-black">No dailies yet</h2>
             <p className="mt-2 text-sm leading-6 text-black/70">
               No daily summaries are available for the selected organization.
             </p>
-          </article>
+          </InfoCard>
         ) : (
           <div className="grid gap-4">
             {dailies.map((daily) => (
@@ -46,8 +47,8 @@ export async function DailiesContent({
             ))}
           </div>
         )}
-      </section>
-    </main>
+      </PageSurface>
+    </PageShell>
   );
 }
 
@@ -143,9 +144,9 @@ function DailyListItem({ daily }: DailyListItemProps) {
 
   if (disabled) {
     return (
-      <article className="cursor-not-allowed rounded-xl border border-black/8 bg-[#F6F3F4] p-5 opacity-80">
+      <InfoCard className="cursor-not-allowed opacity-80" tone="muted">
         {content}
-      </article>
+      </InfoCard>
     );
   }
 

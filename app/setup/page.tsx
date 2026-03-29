@@ -10,6 +10,7 @@ import {
   isUnauthorizedError,
   startSetup,
 } from "@/lib/api/organizations-client";
+import { InfoCard, PageHeader, PageShell, PageSurface } from "@/app/components/page-shell";
 
 const GITHUB_APP_INSTALL_URL =
   "https://github.com/apps/cadence-engineer/installations/new";
@@ -116,14 +117,12 @@ export default function SetupPage() {
   }
 
   return (
-    <main className="h-full bg-transparent px-6 py-8 md:px-8 md:py-10">
-      <section className="mx-auto w-full max-w-4xl rounded-2xl bg-white p-8 shadow-[0_14px_40px_rgba(0,0,0,0.18)] md:p-10">
-        <h1 className="mb-2 text-3xl font-bold tracking-tight text-black">
-          Setup
-        </h1>
-        <p className="mb-6 text-black">
-          Choose the GitHub organization that Cadence Engineer should initialize.
-        </p>
+    <PageShell>
+      <PageSurface className="space-y-6">
+        <PageHeader
+          title="Setup"
+          description="Choose the GitHub organization that Cadence Engineer should initialize."
+        />
 
         {isLoading ? <p className="text-sm text-black/80">Loading organizations...</p> : null}
 
@@ -134,8 +133,8 @@ export default function SetupPage() {
         ) : null}
 
         {!isLoading && !errorMessage && organizations.length === 0 ? (
-          <div className="rounded-xl bg-[#FFF4F7] p-6">
-            <p className="mb-4 text-sm text-black">
+          <InfoCard className="space-y-4" tone="tinted">
+            <p className="text-sm text-black">
               No linked organizations found yet.
             </p>
             <a
@@ -144,7 +143,7 @@ export default function SetupPage() {
             >
               Add GitHub organization
             </a>
-          </div>
+          </InfoCard>
         ) : null}
 
         {!isLoading && !errorMessage && organizations.length > 0 ? (
@@ -159,7 +158,7 @@ export default function SetupPage() {
                     type="button"
                     onClick={() => void handleSelectOrganization(organizationLogin)}
                     disabled={isSubmittingSetup}
-                    className={`w-full rounded-xl border p-4 text-left transition ${
+                    className={`w-full rounded-xl border p-5 text-left transition ${
                       isSelected
                         ? "border-[#FF2D55] bg-[#FFF4F7]"
                         : "border-black/10 bg-white hover:border-[#FF2D55]/60"
@@ -188,7 +187,7 @@ export default function SetupPage() {
             </a>
           </div>
         ) : null}
-      </section>
-    </main>
+      </PageSurface>
+    </PageShell>
   );
 }
