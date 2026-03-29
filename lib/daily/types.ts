@@ -20,6 +20,14 @@ export type Daily = {
   confidence: DailyConfidence | null;
 };
 
+function getFallbackTitle(day: string, status?: string): string {
+  if (status === "empty") {
+    return `Empty daily for ${day}`;
+  }
+
+  return `Daily for ${day}`;
+}
+
 function isDailySectionItem(value: unknown): value is DailySectionItem {
   return typeof value === "string" || (typeof value === "object" && value !== null);
 }
@@ -47,26 +55,68 @@ export function isDailyConfidence(value: unknown): value is DailyConfidence | nu
   );
 }
 
-export function isDaily(value: unknown): value is Daily {
+export function parseDaily(value: unknown): Daily | null {
   if (typeof value !== "object" || value === null) {
-    return false;
+    return null;
   }
 
   const maybeDaily = value as Record<string, unknown>;
-  return (
-    typeof maybeDaily.id === "string" &&
-    typeof maybeDaily.day === "string" &&
-    typeof maybeDaily.title === "string" &&
-    (typeof maybeDaily.status === "string" || typeof maybeDaily.status === "undefined") &&
-    (typeof maybeDaily.text === "string" || maybeDaily.text === null) &&
-    isDailySectionArrayOrNull(maybeDaily.changes) &&
-    isDailySectionArrayOrNull(maybeDaily.intents) &&
-    isDailySectionArrayOrNull(maybeDaily.areas) &&
-    isDailySectionArrayOrNull(maybeDaily.impacts) &&
-    isDailySectionArrayOrNull(maybeDaily.risks) &&
-    isDailySectionArrayOrNull(maybeDaily.implications) &&
-    isDailyConfidence(maybeDaily.confidence)
-  );
+  if (typeof maybeDaily.id !== "string" || typeof maybeDaily.day !== "string") {
+    return null;
+  }
+
+  if (
+    typeof maybeDaily.status !== "string" &&
+    typeof maybeDaily.status !== "undefined"
+  ) {
+    return null;
+  }
+
+  const status = maybeDaily.status;
+
+  if (
+    typeof maybeDaily.text !== "string" &&
+    maybeDaily.text !== null &&
+    typeof maybeDaily.text !== "undefined"
+  ) {
+    return null;
+  }
+
+  if (
+    !isDailySectionArrayOrNull(maybeDaily.changes ?? null) ||
+    !isDailySectionArrayOrNull(maybeDaily.intents ?? null) ||
+    !isDailySectionArrayOrNull(maybeDaily.areas ?? null) ||
+    !isDailySectionArrayOrNull(maybeDaily.impacts ?? null) ||
+    !isDailySectionArrayOrNull(maybeDaily.risks ?? null) ||
+    !isDailySectionArrayOrNull(maybeDaily.implications ?? null) ||
+    !isDailyConfidence(maybeDaily.confidence ?? null)
+  ) {
+    return null;
+  }
+
+  const title =
+    typeof maybeDaily.title === "string" && maybeDaily.title.trim().length > 0
+      ? maybeDaily.title
+      : getFallbackTitle(maybeDaily.day, status);
+
+  return {
+    id: maybeDaily.id,
+    day: maybeDaily.day,
+    title,
+    status,
+    text: typeof maybeDaily.text === "string" ? maybeDaily.text : null,
+    changes: (maybeDaily.changes ?? null) as DailySectionItem[] | null,
+    intents: (maybeDaily.intents ?? null) as DailySectionItem[] | null,
+    areas: (maybeDaily.areas ?? null) as DailySectionItem[] | null,
+    impacts: (maybeDaily.impacts ?? null) as DailySectionItem[] | null,
+    risks: (maybeDaily.risks ?? null) as DailySectionItem[] | null,
+    implications: (maybeDaily.implications ?? null) as DailySectionItem[] | null,
+    confidence: (maybeDaily.confidence ?? null) as DailyConfidence | null,
+  };
+}
+
+export function isDaily(value: unknown): value is Daily {
+  return parseDaily(value) !== null;
 }
 
 function hasItems(items: DailySectionItem[] | null): boolean {

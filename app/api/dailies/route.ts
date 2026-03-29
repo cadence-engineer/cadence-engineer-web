@@ -7,7 +7,7 @@ import {
   AUTH_COOKIE_NAMES,
   createUnauthorizedResponse,
 } from "@/lib/server/auth-cookies";
-import { isDaily } from "@/lib/daily/types";
+import { parseDaily } from "@/lib/daily/types";
 
 function getAccessToken(request: NextRequest): string | null {
   return request.cookies.get(AUTH_COOKIE_NAMES.access)?.value ?? null;
@@ -73,7 +73,12 @@ export async function GET(request: NextRequest) {
     }
 
     const payload = (await response.json()) as unknown;
-    const dailies = Array.isArray(payload) ? payload.filter(isDaily) : [];
+    const dailies = Array.isArray(payload)
+      ? payload.flatMap((item) => {
+          const daily = parseDaily(item);
+          return daily ? [daily] : [];
+        })
+      : [];
 
     return NextResponse.json({ dailies });
   } catch (error) {

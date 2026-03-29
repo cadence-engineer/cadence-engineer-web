@@ -7,7 +7,7 @@ import {
   AUTH_COOKIE_NAMES,
   createUnauthorizedResponse,
 } from "@/lib/server/auth-cookies";
-import { isDaily } from "@/lib/daily/types";
+import { parseDaily } from "@/lib/daily/types";
 
 type RouteContext = {
   params: Promise<{
@@ -82,12 +82,13 @@ export async function GET(request: NextRequest, context: RouteContext) {
     }
 
     const payload = (await response.json()) as unknown;
-    if (!isDaily(payload)) {
+    const daily = parseDaily(payload);
+    if (!daily) {
       console.error("Daily payload has invalid shape", payload);
       return NextResponse.json({ reason: "Failed to fetch daily" }, { status: 502 });
     }
 
-    return NextResponse.json({ daily: payload });
+    return NextResponse.json({ daily });
   } catch (error) {
     console.error("BFF daily request crashed", { id, error });
     return NextResponse.json({ reason: "Failed to fetch daily" }, { status: 502 });

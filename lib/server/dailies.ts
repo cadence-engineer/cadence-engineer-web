@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { fetchCadenceApi } from "@/lib/server/cadence-api";
 import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
-import { isDaily, type Daily } from "@/lib/daily/types";
+import { parseDaily, type Daily } from "@/lib/daily/types";
 
 export class DailyServerError extends Error {
   readonly status: number;
@@ -43,7 +43,12 @@ export async function fetchServerDailies(): Promise<Daily[]> {
   }
 
   const payload = (await response.json()) as unknown;
-  return Array.isArray(payload) ? payload.filter(isDaily) : [];
+  return Array.isArray(payload)
+    ? payload.flatMap((item) => {
+        const daily = parseDaily(item);
+        return daily ? [daily] : [];
+      })
+    : [];
 }
 
 export async function fetchServerDaily(id: string): Promise<Daily> {
@@ -70,9 +75,10 @@ export async function fetchServerDaily(id: string): Promise<Daily> {
   }
 
   const payload = (await response.json()) as unknown;
-  if (!isDaily(payload)) {
+  const daily = parseDaily(payload);
+  if (!daily) {
     throw new DailyServerError("Invalid daily payload", 502);
   }
 
-  return payload;
+  return daily;
 }
