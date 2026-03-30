@@ -99,7 +99,7 @@ export default async function DailyDetailPage({ params }: DailyDetailPageProps) 
       </PageShell>
     );
   } catch (error) {
-    if (error instanceof DailyServerError && error.status === 401) {
+    if (error instanceof DailyServerError && (error.status === 401 || error.status === 403)) {
       redirect("/auth/sign-out");
     }
 
