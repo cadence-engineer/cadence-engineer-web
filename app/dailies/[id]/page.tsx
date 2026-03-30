@@ -62,6 +62,7 @@ export default async function DailyDetailPage({ params }: DailyDetailPageProps) 
             actions={
               <Link
                 href="/"
+                prefetch={false}
                 className="inline-flex w-fit rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-black/85"
               >
                 Back to dailies

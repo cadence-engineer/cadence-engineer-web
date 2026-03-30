@@ -59,6 +59,7 @@ export async function Header() {
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4">
         <Link
           href="/"
+          prefetch={false}
           className="inline-flex items-center"
           aria-label="Cadence Engineer home"
         >

@@ -160,6 +160,7 @@ function DailyListItem({ daily }: DailyListItemProps) {
   return (
     <Link
       href={`/dailies/${daily.id}`}
+      prefetch={false}
       className="group block rounded-xl border border-black/10 bg-[#FFF7F9] p-5 transition hover:border-[#FF2D55]/30 hover:bg-white hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
     >
       {content}
