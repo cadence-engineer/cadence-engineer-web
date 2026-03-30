@@ -130,35 +130,6 @@ export async function fetchSelectedOrganizationLogin(): Promise<string | null> {
   return typeof payload.login === "string" ? payload.login : null;
 }
 
-export async function updateSelectedOrganization(login: string): Promise<string> {
-  const response = await fetchBff("/api/organization", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ login }),
-  });
-
-  if (response.status === 401) {
-    throw new UnauthorizedError();
-  }
-
-  await throwIfReauthRequired(response);
-
-  if (!response.ok) {
-    throw new Error(
-      `Organization update request failed with status ${response.status}`,
-    );
-  }
-
-  const payload = (await response.json()) as SelectedOrganizationResponse;
-  if (typeof payload.login !== "string") {
-    throw new Error("Organization update returned invalid payload");
-  }
-
-  return payload.login;
-}
-
 export async function fetchSetupRequired(): Promise<boolean> {
   const response = await fetchBff("/api/setup", { method: "GET" });
 
