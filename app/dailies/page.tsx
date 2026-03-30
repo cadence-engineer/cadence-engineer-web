@@ -1,5 +1,5 @@
-import { DailiesContent } from "../components/dailies-content";
+import { redirect } from "next/navigation";
 
-export default async function DailiesPage() {
-  return <DailiesContent />;
+export default function DailiesPage() {
+  redirect("/");
 }
