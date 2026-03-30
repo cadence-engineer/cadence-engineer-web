@@ -5,6 +5,8 @@ type JwtPayload = {
   expiration?: number;
 };
 
+export type AccessTokenState = "valid" | "expired" | "invalid";
+
 function decodeBase64Url(value: string): string | null {
   const normalizedValue = value.replace(/-/g, "+").replace(/_/g, "/");
   const paddingLength = (4 - (normalizedValue.length % 4)) % 4;
@@ -26,7 +28,13 @@ function decodeBase64Url(value: string): string | null {
 }
 
 function decodeJwtPayload(token: string): JwtPayload | null {
-  const [, payloadSegment] = token.split(".");
+  const tokenSegments = token.split(".");
+
+  if (tokenSegments.length !== 3) {
+    return null;
+  }
+
+  const [, payloadSegment] = tokenSegments;
 
   if (!payloadSegment) {
     return null;
@@ -44,18 +52,26 @@ function decodeJwtPayload(token: string): JwtPayload | null {
   }
 }
 
-export function isAccessTokenExpired(token: string): boolean {
+export function getAccessTokenState(token: string): AccessTokenState {
   const payload = decodeJwtPayload(token);
 
   if (typeof payload?.expiration !== "number") {
-    return false;
+    return "invalid";
   }
 
-  return payload.expiration <= Date.now() / 1000;
+  if (payload.expiration <= Date.now() / 1000) {
+    return "expired";
+  }
+
+  return "valid";
+}
+
+export function isAccessTokenExpired(token: string): boolean {
+  return getAccessTokenState(token) === "expired";
 }
 
 export function getValidAccessToken(token: string | null | undefined): string | null {
-  if (!token || isAccessTokenExpired(token)) {
+  if (!token || getAccessTokenState(token) !== "valid") {
     return null;
   }
 

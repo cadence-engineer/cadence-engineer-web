@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { AUTH_COOKIE_NAMES, clearAuthCookies } from "@/lib/server/auth-cookies";
-import { isAccessTokenExpired } from "@/lib/server/access-token";
+import { getAccessTokenState } from "@/lib/server/access-token";
 
 function isProtectedPath(pathname: string): boolean {
   return (
@@ -14,8 +14,9 @@ function isProtectedPath(pathname: string): boolean {
 
 export function proxy(request: NextRequest) {
   const accessToken = request.cookies.get(AUTH_COOKIE_NAMES.access)?.value;
+  const accessTokenState = accessToken ? getAccessTokenState(accessToken) : null;
 
-  if (!accessToken || !isAccessTokenExpired(accessToken)) {
+  if (!accessToken || accessTokenState === "valid") {
     return NextResponse.next();
   }
 
