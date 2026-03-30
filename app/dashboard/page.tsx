@@ -1,22 +1,16 @@
 import { redirect } from "next/navigation";
 import { DashboardContent } from "../components/dashboard-content";
+import { SetupContent } from "../components/setup-content";
 import { getValidAccessTokenFromCookies } from "@/lib/server/auth-session";
 import { fetchDashboardSetupState } from "@/lib/server/setup";
 
-type DashboardPageProps = {
-  searchParams: Promise<{ auth?: string }>;
-};
-
-export default async function DashboardPage({
-  searchParams,
-}: DashboardPageProps) {
+export default async function DashboardPage() {
   const accessToken = await getValidAccessTokenFromCookies();
 
   if (!accessToken) {
     redirect("/");
   }
 
-  const { auth } = await searchParams;
   const { isSetupComplete, selectedOrganizationLogin, isUnauthorized } =
     await fetchDashboardSetupState(accessToken);
 
@@ -24,9 +18,12 @@ export default async function DashboardPage({
     redirect("/auth/sign-out");
   }
 
+  if (!isSetupComplete) {
+    return <SetupContent />;
+  }
+
   return (
     <DashboardContent
-      showAuthSuccess={auth === "success"}
       isSetupComplete={isSetupComplete}
       selectedOrganizationLogin={selectedOrganizationLogin}
     />

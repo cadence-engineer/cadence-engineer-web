@@ -1,11 +1,24 @@
+import { redirect } from "next/navigation";
 import { RotatingAudience } from "./components/rotating-audience";
 import { DailiesContent } from "./components/dailies-content";
 import { getValidAccessTokenFromCookies } from "@/lib/server/auth-session";
+import { fetchDashboardSetupState } from "@/lib/server/setup";
 
 export default async function Home() {
   const accessToken = await getValidAccessTokenFromCookies();
 
   if (accessToken) {
+    const { isSetupComplete, isUnauthorized } =
+      await fetchDashboardSetupState(accessToken);
+
+    if (isUnauthorized) {
+      redirect("/auth/sign-out");
+    }
+
+    if (!isSetupComplete) {
+      redirect("/dashboard");
+    }
+
     return <DailiesContent />;
   }
 

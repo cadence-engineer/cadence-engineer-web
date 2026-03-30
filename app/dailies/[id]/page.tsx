@@ -61,7 +61,7 @@ export default async function DailyDetailPage({ params }: DailyDetailPageProps) 
             description={formatDailyDate(daily.day)}
             actions={
               <Link
-                href="/"
+                href="/dailies"
                 prefetch={false}
                 className="inline-flex w-fit rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-black/85"
               >

@@ -3,24 +3,17 @@
 import { InfoCard, PageHeader, PageShell, PageSurface } from "./page-shell";
 
 type DashboardContentProps = {
-  showAuthSuccess: boolean;
   isSetupComplete: boolean;
   selectedOrganizationLogin: string | null;
 };
 
 export function DashboardContent({
-  showAuthSuccess,
   isSetupComplete,
   selectedOrganizationLogin,
 }: DashboardContentProps) {
   return (
     <PageShell>
       <PageSurface className="space-y-6">
-        {showAuthSuccess ? (
-          <p className="rounded-md bg-[#E8FFEF] px-3 py-2 text-sm text-[#146B2E]">
-            Successfully authenticated with GitHub.
-          </p>
-        ) : null}
         <PageHeader title="Dashboard" />
         <InfoCard tone="tinted">
           <div className="flex flex-col gap-4">
