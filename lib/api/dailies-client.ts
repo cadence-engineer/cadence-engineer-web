@@ -46,7 +46,7 @@ async function throwIfReauthRequired(response: Response): Promise<void> {
   }
 
   try {
-    const payload = (await response.json()) as { code?: string; reauthUrl?: string };
+    const payload = (await response.clone().json()) as { code?: string; reauthUrl?: string };
     if (
       payload.code === "reauth_required" &&
       typeof payload.reauthUrl === "string" &&

@@ -56,7 +56,7 @@ async function throwIfReauthRequired(response: Response): Promise<void> {
   let payload: RedirectErrorResponse | null = null;
 
   try {
-    payload = (await response.json()) as RedirectErrorResponse;
+    payload = (await response.clone().json()) as RedirectErrorResponse;
   } catch {
     return;
   }
