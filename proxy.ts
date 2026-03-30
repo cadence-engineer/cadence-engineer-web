@@ -3,16 +3,20 @@ import { NextResponse } from "next/server";
 import { AUTH_COOKIE_NAMES, clearAuthCookies } from "@/lib/server/auth-cookies";
 import { getAccessTokenState } from "@/lib/server/access-token";
 
-function isProtectedPath(pathname: string): boolean {
+function shouldBypassAuthRedirect(pathname: string): boolean {
   return (
-    pathname === "/dashboard" ||
-    pathname === "/setup" ||
-    pathname === "/dailies" ||
-    pathname.startsWith("/dailies/")
+    pathname === "/auth/sign-out" ||
+    pathname === "/auth/session-expired" ||
+    pathname === "/auth/github/start" ||
+    pathname === "/auth/github/callback"
   );
 }
 
 export function proxy(request: NextRequest) {
+  if (shouldBypassAuthRedirect(request.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
+
   const accessToken = request.cookies.get(AUTH_COOKIE_NAMES.access)?.value;
   const accessTokenState = accessToken ? getAccessTokenState(accessToken) : null;
 
@@ -20,12 +24,8 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (isProtectedPath(request.nextUrl.pathname)) {
-    const response = NextResponse.redirect(new URL("/", request.url));
-    return clearAuthCookies(response);
-  }
-
-  return clearAuthCookies(NextResponse.next());
+  const response = NextResponse.redirect(new URL("/auth/session-expired", request.url));
+  return clearAuthCookies(response);
 }
 
 export const config = {

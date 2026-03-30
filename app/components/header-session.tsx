@@ -1,9 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { fetchSessionStatus } from "@/lib/api/auth-client";
 import { UserMenu } from "./user-menu";
 
 type HeaderSessionState = {
@@ -16,40 +13,8 @@ type HeaderSessionProps = {
 };
 
 export function HeaderSession({ initialSession }: HeaderSessionProps) {
-  const pathname = usePathname();
-  const [session, setSession] = useState(initialSession);
-
-  useEffect(() => {
-    setSession(initialSession);
-  }, [initialSession]);
-
-  useEffect(() => {
-    let isCancelled = false;
-
-    async function syncSession() {
-      try {
-        const isSignedIn = await fetchSessionStatus();
-
-        if (!isCancelled && !isSignedIn) {
-          setSession({
-            isSignedIn: false,
-            displayName: "",
-          });
-        }
-      } catch (error) {
-        console.error("Failed to sync header session", error);
-      }
-    }
-
-    void syncSession();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [pathname]);
-
-  if (session.isSignedIn) {
-    return <UserMenu displayName={session.displayName} />;
+  if (initialSession.isSignedIn) {
+    return <UserMenu displayName={initialSession.displayName} />;
   }
 
   return (
