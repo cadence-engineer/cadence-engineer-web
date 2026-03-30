@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { fetchCadenceApi } from "@/lib/server/cadence-api";
 import { AUTH_COOKIE_NAMES, getIsSecureCookie } from "@/lib/server/auth-cookies";
 
-export async function POST(request: NextRequest) {
+async function clearSessionAndRedirect(request: NextRequest) {
   const accessToken = request.cookies.get(AUTH_COOKIE_NAMES.access)?.value;
 
   if (accessToken) {
@@ -29,4 +29,12 @@ export async function POST(request: NextRequest) {
   });
 
   return response;
+}
+
+export async function GET(request: NextRequest) {
+  return clearSessionAndRedirect(request);
+}
+
+export async function POST(request: NextRequest) {
+  return clearSessionAndRedirect(request);
 }

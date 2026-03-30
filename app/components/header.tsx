@@ -3,7 +3,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { fetchCadenceApi } from "@/lib/server/cadence-api";
 import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
-import { UserMenu } from "./user-menu";
+import { HeaderSession } from "./header-session";
 
 type UserNameResponse = {
   name: string;
@@ -97,18 +97,7 @@ export async function Header() {
             priority
           />
         </Link>
-        {isSignedIn ? (
-          <UserMenu displayName={displayName} />
-        ) : (
-          <nav className="flex items-center gap-6 text-sm font-semibold">
-            <Link href="/pricing" className="text-[#FF2D55] hover:text-[#E60045]">
-              Pricing
-            </Link>
-            <Link href="/sign-in" className="text-[#FF2D55] hover:text-[#E60045]">
-              Sign in
-            </Link>
-          </nav>
-        )}
+        <HeaderSession initialSession={{ isSignedIn, displayName }} />
       </div>
     </header>
   );
