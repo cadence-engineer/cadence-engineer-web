@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { isEmptyDaily, isPendingDaily } from "@/lib/daily/types";
 import { fetchServerDailies } from "@/lib/server/dailies";
+import { PendingDailyLoading } from "./pending-daily-loading";
 import { InfoCard, PageHeader, PageShell, PageSurface } from "./page-shell";
 
 function formatDailyDate(day: string): string {
@@ -57,12 +58,7 @@ type DailyListItemProps = {
 };
 
 function LoadingIcon() {
-  return (
-    <span
-      aria-hidden="true"
-      className="h-4 w-4 animate-spin rounded-full border-2 border-black/20 border-t-[#FF2D55]"
-    />
-  );
+  return <PendingDailyLoading />;
 }
 
 function getConfidencePillStyles(
@@ -121,30 +117,35 @@ function DailyListItem({ daily }: DailyListItemProps) {
             className="inline-flex w-fit shrink-0 items-center gap-2 self-start rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
             style={getConfidencePillStyles(confidenceLabel, disabled)}
           >
-            {pending ? <LoadingIcon /> : null}
             {confidenceText}
           </span>
         </div>
-        <h2
-          className={`line-clamp-2 text-xl font-bold ${
-            disabled
-              ? "text-black/55"
-              : "text-black transition group-hover:text-[#C61A44]"
-          }`}
-        >
-          {daily.title}
-        </h2>
-        <p
-          className={`line-clamp-1 max-w-3xl text-sm leading-6 ${
-            disabled ? "text-black/45" : "text-black/75"
-          }`}
-        >
-          {pending
-            ? "Daily generation is still in progress."
-            : empty
-              ? "No daily summary content was generated for this day."
-              : daily.text?.trim() || "Open this daily to see the full summary."}
-        </p>
+        {pending ? (
+          <div className="flex min-h-28 items-center justify-center py-3">
+            <LoadingIcon />
+          </div>
+        ) : (
+          <>
+            <h2
+              className={`line-clamp-2 text-xl font-bold ${
+                disabled
+                  ? "text-black/55"
+                  : "text-black transition group-hover:text-[#C61A44]"
+              }`}
+            >
+              {daily.title}
+            </h2>
+            <p
+              className={`line-clamp-1 max-w-3xl text-sm leading-6 ${
+                disabled ? "text-black/45" : "text-black/75"
+              }`}
+            >
+              {empty
+                ? "No daily summary content was generated for this day."
+                : daily.text?.trim() || "Open this daily to see the full summary."}
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
