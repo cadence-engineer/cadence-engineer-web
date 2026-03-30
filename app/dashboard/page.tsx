@@ -1,7 +1,6 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { DashboardContent } from "../components/dashboard-content";
-import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
+import { getValidAccessTokenFromCookies } from "@/lib/server/auth-session";
 import { fetchDashboardSetupState } from "@/lib/server/setup";
 
 type DashboardPageProps = {
@@ -11,8 +10,7 @@ type DashboardPageProps = {
 export default async function DashboardPage({
   searchParams,
 }: DashboardPageProps) {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get(AUTH_COOKIE_NAMES.access)?.value ?? null;
+  const accessToken = await getValidAccessTokenFromCookies();
 
   if (!accessToken) {
     redirect("/");

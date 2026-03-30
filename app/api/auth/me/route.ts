@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchCadenceApi } from "@/lib/server/cadence-api";
-import {
-  AUTH_COOKIE_NAMES,
-  createUnauthorizedResponse,
-} from "@/lib/server/auth-cookies";
+import { createUnauthorizedResponse } from "@/lib/server/auth-cookies";
+import { getValidAccessTokenFromRequest } from "@/lib/server/access-token";
 
 type UserNameResponse = {
   name: string;
@@ -19,7 +17,7 @@ function isUserNameResponse(value: unknown): value is UserNameResponse {
 }
 
 export async function GET(request: NextRequest) {
-  const accessToken = request.cookies.get(AUTH_COOKIE_NAMES.access)?.value;
+  const accessToken = getValidAccessTokenFromRequest(request);
 
   if (!accessToken) {
     return createUnauthorizedResponse();

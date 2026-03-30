@@ -3,10 +3,8 @@ import {
   fetchCadenceApi,
   getCadenceRedirectDetails,
 } from "@/lib/server/cadence-api";
-import {
-  AUTH_COOKIE_NAMES,
-  createUnauthorizedResponse,
-} from "@/lib/server/auth-cookies";
+import { createUnauthorizedResponse } from "@/lib/server/auth-cookies";
+import { getValidAccessTokenFromRequest } from "@/lib/server/access-token";
 import { parseDaily } from "@/lib/daily/types";
 
 type RouteContext = {
@@ -14,10 +12,6 @@ type RouteContext = {
     id: string;
   }>;
 };
-
-function getAccessToken(request: NextRequest): string | null {
-  return request.cookies.get(AUTH_COOKIE_NAMES.access)?.value ?? null;
-}
 
 function createRedirectErrorResponse(request: NextRequest, response: Response) {
   const redirectDetails = getCadenceRedirectDetails(request, response);
@@ -35,7 +29,7 @@ function createRedirectErrorResponse(request: NextRequest, response: Response) {
 }
 
 export async function GET(request: NextRequest, context: RouteContext) {
-  const accessToken = getAccessToken(request);
+  const accessToken = getValidAccessTokenFromRequest(request);
 
   if (!accessToken) {
     return createUnauthorizedResponse();

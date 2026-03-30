@@ -47,6 +47,27 @@ export async function fetchCurrentSession(): Promise<CurrentSession> {
   };
 }
 
+export async function fetchSessionStatus(): Promise<boolean> {
+  const response = await fetchBff("/api/auth/session", {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  if (response.status === 401 || response.status === 403) {
+    return false;
+  }
+
+  if (response.status === 204) {
+    return true;
+  }
+
+  if (!response.ok) {
+    throw new Error(`Session status lookup failed with status ${response.status}`);
+  }
+
+  return true;
+}
+
 export async function logoutCurrentSession(): Promise<void> {
   const response = await fetchBff("/api/auth/logout", { method: "POST" });
 

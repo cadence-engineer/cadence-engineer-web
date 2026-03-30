@@ -3,14 +3,8 @@ import {
   fetchCadenceApi,
   getCadenceRedirectDetails,
 } from "@/lib/server/cadence-api";
-import {
-  AUTH_COOKIE_NAMES,
-  createUnauthorizedResponse,
-} from "@/lib/server/auth-cookies";
-
-function getAccessToken(request: NextRequest): string | null {
-  return request.cookies.get(AUTH_COOKIE_NAMES.access)?.value ?? null;
-}
+import { createUnauthorizedResponse } from "@/lib/server/auth-cookies";
+import { getValidAccessTokenFromRequest } from "@/lib/server/access-token";
 
 function createRedirectErrorResponse(
   request: NextRequest,
@@ -48,7 +42,7 @@ async function readBackendReason(response: Response): Promise<string> {
 }
 
 export async function GET(request: NextRequest) {
-  const accessToken = getAccessToken(request);
+  const accessToken = getValidAccessTokenFromRequest(request);
 
   if (!accessToken) {
     return createUnauthorizedResponse();
@@ -99,7 +93,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const accessToken = getAccessToken(request);
+  const accessToken = getValidAccessTokenFromRequest(request);
 
   if (!accessToken) {
     return createUnauthorizedResponse();

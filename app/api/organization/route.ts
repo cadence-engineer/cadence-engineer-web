@@ -3,10 +3,8 @@ import {
   fetchCadenceApi,
   getCadenceRedirectDetails,
 } from "@/lib/server/cadence-api";
-import {
-  AUTH_COOKIE_NAMES,
-  createUnauthorizedResponse,
-} from "@/lib/server/auth-cookies";
+import { createUnauthorizedResponse } from "@/lib/server/auth-cookies";
+import { getValidAccessTokenFromRequest } from "@/lib/server/access-token";
 
 type OrganizationResponse = {
   login: string;
@@ -19,10 +17,6 @@ function isOrganizationResponse(value: unknown): value is OrganizationResponse {
 
   const maybeOrganization = value as Record<string, unknown>;
   return typeof maybeOrganization.login === "string";
-}
-
-function getAccessToken(request: NextRequest): string | null {
-  return request.cookies.get(AUTH_COOKIE_NAMES.access)?.value ?? null;
 }
 
 function createRedirectErrorResponse(
@@ -45,7 +39,7 @@ function createRedirectErrorResponse(
 }
 
 export async function GET(request: NextRequest) {
-  const accessToken = getAccessToken(request);
+  const accessToken = getValidAccessTokenFromRequest(request);
 
   if (!accessToken) {
     return createUnauthorizedResponse();

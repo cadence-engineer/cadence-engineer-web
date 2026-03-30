@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { fetchCurrentSession } from "@/lib/api/auth-client";
+import { fetchSessionStatus } from "@/lib/api/auth-client";
 import { UserMenu } from "./user-menu";
 
 type HeaderSessionState = {
@@ -20,24 +20,24 @@ export function HeaderSession({ initialSession }: HeaderSessionProps) {
   const [session, setSession] = useState(initialSession);
 
   useEffect(() => {
+    setSession(initialSession);
+  }, [initialSession]);
+
+  useEffect(() => {
     let isCancelled = false;
 
     async function syncSession() {
       try {
-        const nextSession = await fetchCurrentSession();
+        const isSignedIn = await fetchSessionStatus();
 
-        if (!isCancelled) {
-          setSession(nextSession);
-        }
-      } catch (error) {
-        console.error("Failed to sync header session", error);
-
-        if (!isCancelled) {
+        if (!isCancelled && !isSignedIn) {
           setSession({
             isSignedIn: false,
             displayName: "",
           });
         }
+      } catch (error) {
+        console.error("Failed to sync header session", error);
       }
     }
 

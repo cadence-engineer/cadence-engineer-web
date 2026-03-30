@@ -1,7 +1,6 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { fetchCadenceApi } from "@/lib/server/cadence-api";
-import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
+import { getValidAccessTokenFromCookies } from "@/lib/server/auth-session";
 import { parseDaily, type Daily } from "@/lib/daily/types";
 
 export class DailyServerError extends Error {
@@ -14,13 +13,8 @@ export class DailyServerError extends Error {
   }
 }
 
-async function getAccessToken(): Promise<string | null> {
-  const cookieStore = await cookies();
-  return cookieStore.get(AUTH_COOKIE_NAMES.access)?.value ?? null;
-}
-
 export async function fetchServerDailies(): Promise<Daily[]> {
-  const accessToken = await getAccessToken();
+  const accessToken = await getValidAccessTokenFromCookies();
 
   if (!accessToken) {
     throw new DailyServerError("Unauthorized", 401);
@@ -52,7 +46,7 @@ export async function fetchServerDailies(): Promise<Daily[]> {
 }
 
 export async function fetchServerDaily(id: string): Promise<Daily> {
-  const accessToken = await getAccessToken();
+  const accessToken = await getValidAccessTokenFromCookies();
 
   if (!accessToken) {
     throw new DailyServerError("Unauthorized", 401);

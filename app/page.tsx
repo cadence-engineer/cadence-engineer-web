@@ -1,11 +1,9 @@
-import { cookies } from "next/headers";
 import { RotatingAudience } from "./components/rotating-audience";
-import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
 import { DailiesContent } from "./components/dailies-content";
+import { getValidAccessTokenFromCookies } from "@/lib/server/auth-session";
 
 export default async function Home() {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get(AUTH_COOKIE_NAMES.access)?.value ?? null;
+  const accessToken = await getValidAccessTokenFromCookies();
 
   if (accessToken) {
     return <DailiesContent />;
