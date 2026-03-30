@@ -169,3 +169,15 @@ export function getDailySectionItemText(item: DailySectionItem): string {
 
   return JSON.stringify(item);
 }
+
+export function getDailySectionItemKey(item: DailySectionItem, index: number): string {
+  if (typeof item === "string") {
+    return `text:${index}:${item}`;
+  }
+
+  if (typeof item.id === "string" && item.id.trim().length > 0) {
+    return item.id;
+  }
+
+  return `item:${index}:${getDailySectionItemText(item)}`;
+}

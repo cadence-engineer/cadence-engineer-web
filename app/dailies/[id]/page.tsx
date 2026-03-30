@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { getDailySectionItemText } from "@/lib/daily/types";
+import { getDailySectionItemKey, getDailySectionItemText } from "@/lib/daily/types";
 import { DailyServerError, fetchServerDaily } from "@/lib/server/dailies";
 import { InfoCard, PageHeader, PageShell, PageSurface } from "@/app/components/page-shell";
 
@@ -37,8 +37,8 @@ function renderListSection(
     <InfoCard className="space-y-3">
       <h2 className="text-lg font-bold text-black">{title}</h2>
       <ul className="space-y-2 text-sm leading-6 text-black/80">
-        {items.map((item) => (
-          <li key={getDailySectionItemText(item)} className="rounded-lg bg-[#FFF7F9] px-3 py-2">
+        {items.map((item, index) => (
+          <li key={getDailySectionItemKey(item, index)} className="rounded-lg bg-[#FFF7F9] px-3 py-2">
             {getDailySectionItemText(item)}
           </li>
         ))}
