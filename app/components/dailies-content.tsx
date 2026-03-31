@@ -29,20 +29,14 @@ export async function DailiesContent({
 }: DailiesContentProps) {
   const dailies = await fetchServerDailies();
   const hasPendingDailies = dailies.some(isPendingDaily);
+  const pendingNotice = hasPendingDailies
+    ? "Please wait while dailies are being created. This may take a few minutes. If nothing happens, try refreshing the page."
+    : undefined;
 
   return (
     <PageShell>
       <PageSurface className="space-y-6">
-        <PageHeader
-          title={title}
-          titleAccessory={
-            hasPendingDailies ? (
-              <p className="flex-1 text-right text-sm align-bottom font-medium text-black/65">
-                please wait while dailies are being created
-              </p>
-            ) : null
-          }
-        />
+        <PageHeader title={title} description={pendingNotice} />
 
         {dailies.length === 0 ? (
           <InfoCard className="border-dashed" tone="tinted">
