@@ -84,24 +84,24 @@ export default async function DailyDetailPage({ params }: DailyDetailPageProps) 
             }
           />
 
-          <InfoCard className="space-y-2">
-            <h2 className="text-lg font-bold text-black">Summary</h2>
-            <p className="text-base leading-7 text-black">
-              {daily.text?.trim() || "No summary text was provided for this daily."}
-            </p>
-          </InfoCard>
+          <p className="text-base leading-7 text-black">
+            {daily.text?.trim() || "No summary text was provided for this daily."}
+          </p>
 
           {daily.confidence ? (
-            <InfoCard className="space-y-2">
-              <h2 className="text-lg font-bold text-black">Confidence</h2>
-              <p
-                className="inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
-                style={getConfidencePillStyles(daily.confidence.level)}
-              >
-                {daily.confidence.level}
-              </p>
-              <p className="text-sm text-black/80">{daily.confidence.rationale}</p>
-            </InfoCard>
+            <>
+              <div aria-hidden="true" className="h-10" />
+              <InfoCard className="space-y-2">
+                <h2 className="text-lg font-bold text-black">Confidence</h2>
+                <p
+                  className="inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
+                  style={getConfidencePillStyles(daily.confidence.level)}
+                >
+                  {daily.confidence.level}
+                </p>
+                <p className="text-sm text-black/80">{daily.confidence.rationale}</p>
+              </InfoCard>
+            </>
           ) : null}
 
           {supplementalSections.length > 0 ? (
