@@ -33,7 +33,7 @@ The browser does not call `api.cadence.engineer` directly for auth and never rec
   - `404 Not Found` means setup is still required or still processing
   - `204 No Content` means setup is complete
 - `POST /api/setup` starts setup for the selected organization and returns `202 Accepted`
-- The dashboard only shows the Setup action while `GET /api/setup` returns `404`
+- When `GET /api/setup` returns `404`, the app redirects authenticated users to `/dashboard`, which renders the setup flow until setup completes
 
 ## Getting Started
 
