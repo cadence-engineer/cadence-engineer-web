@@ -2,6 +2,7 @@ import Link from "next/link";
 import { isEmptyDaily, isPendingDaily } from "@/lib/daily/types";
 import { getConfidencePillStyles } from "@/lib/daily/confidence-pill";
 import { fetchServerDailies } from "@/lib/server/dailies";
+import { DailiesAutoRefresh } from "./dailies-auto-refresh";
 import { PendingDailyLoading } from "./pending-daily-loading";
 import { InfoCard, PageHeader, PageShell, PageSurface } from "./page-shell";
 
@@ -30,11 +31,12 @@ export async function DailiesContent({
   const dailies = await fetchServerDailies();
   const hasPendingDailies = dailies.some(isPendingDaily);
   const pendingNotice = hasPendingDailies
-    ? "Please wait while dailies are being created. This may take a few minutes. If nothing happens, try refreshing the page."
+    ? "Please wait while dailies are being created. This page refreshes every minute for up to 10 minutes while a daily is pending."
     : undefined;
 
   return (
     <PageShell>
+      <DailiesAutoRefresh enabled={hasPendingDailies} />
       <PageSurface className="space-y-6">
         <PageHeader title={title} description={pendingNotice} />
 
