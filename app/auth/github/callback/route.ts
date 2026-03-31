@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       return redirectToSignInWithError(request, "oauth_failed");
     }
 
-    const response = NextResponse.redirect(new URL("/dashboard", request.url));
+    const response = NextResponse.redirect(new URL("/", request.url));
     response.cookies.delete({
       name: AUTH_COOKIE_NAMES.oauthState,
       path: "/auth/github/callback",
