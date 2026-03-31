@@ -15,8 +15,9 @@ Lists daily summaries for the authenticated user's selected organization.
 - JSON array response body:
   - `id` (UUID)
   - `day` (string, `YYYY-MM-DD`)
+  - `status` (string: `pending`, `summarizing`, `summarized`, `empty`, or `failed`)
   - `title` (string)
-  - `text` (string or null)
+  - `text` (string)
   - `changes` (array or null)
   - `intents` (array or null)
   - `areas` (array or null)
@@ -32,6 +33,7 @@ Lists daily summaries for the authenticated user's selected organization.
   {
     "id": "8cc5c9aa-2e73-4e11-b84a-7e457ad01f95",
     "day": "2026-03-10",
+    "status": "summarized",
     "title": "Daily Summary",
     "text": "Two pull requests were merged for the authenticated organization.",
     "changes": [],
@@ -63,8 +65,9 @@ Returns a single daily summary for the authenticated user's selected organizatio
 - JSON response body:
   - `id` (UUID)
   - `day` (string, `YYYY-MM-DD`)
+  - `status` (string: `pending`, `summarizing`, `summarized`, `empty`, or `failed`)
   - `title` (string)
-  - `text` (string or null)
+  - `text` (string)
   - `changes` (array or null)
   - `intents` (array or null)
   - `areas` (array or null)
@@ -79,6 +82,7 @@ Returns a single daily summary for the authenticated user's selected organizatio
 {
   "id": "8cc5c9aa-2e73-4e11-b84a-7e457ad01f95",
   "day": "2026-03-10",
+  "status": "summarized",
   "title": "Daily Summary",
   "text": "Two pull requests were merged for the authenticated organization.",
   "changes": [],
@@ -107,32 +111,42 @@ Returns a single daily summary for the authenticated user's selected organizatio
 ## `POST /v1/dailies`
 
 ### What it does
-Validates the request shape, but daily generation is currently not exposed here.
-This endpoint always returns `501 Not Implemented` because daily generation is handled by setup.
+Creates a daily summary for the requested day and starts async summarization.
+The day must be in the past and within the last 8 days. Returns `409 Conflict` if a daily already exists for that day and organization.
 
 ### What it needs
 - Bearer auth with a Cadence JWT
+- A GitHub App installation with an access token for the user's organization
 - JSON request body:
-  - `day` (string, required, format `YYYY-MM-DD`)
+  - `day` (date, required, ISO 8601 format, must be 1–8 days ago)
 
 ### Request example
 
 ```json
 {
-  "day": "2026-03-10"
+  "day": "2026-03-29T00:00:00Z"
 }
 ```
 
 ### What it returns
-- `501 Not Implemented`
+- `202 Accepted` — daily record created, summarization started in background
 
-### Common error example
+### Common error examples
 
 ```json
 {
   "error": true,
   "runId": "8CC5C9AA-2E73-4E11-B84A-7E457AD01F95",
   "schemaVersion": "1.0.0",
-  "reason": "Daily generation is currently handled by setup."
+  "reason": "A daily already exists for this day."
+}
+```
+
+```json
+{
+  "error": true,
+  "runId": "8CC5C9AA-2E73-4E11-B84A-7E457AD01F95",
+  "schemaVersion": "1.0.0",
+  "reason": "day must be in the past and within the last 8 days"
 }
 ```

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import type { CSSProperties } from "react";
 import { isEmptyDaily, isPendingDaily } from "@/lib/daily/types";
+import { getConfidencePillStyles } from "@/lib/daily/confidence-pill";
 import { fetchServerDailies } from "@/lib/server/dailies";
 import { PendingDailyLoading } from "./pending-daily-loading";
 import { InfoCard, PageHeader, PageShell, PageSurface } from "./page-shell";
@@ -71,41 +71,6 @@ function LoadingIcon() {
   return <PendingDailyLoading />;
 }
 
-function getConfidencePillStyles(
-  level: string | null,
-  disabled: boolean
-): CSSProperties {
-  if (disabled) {
-    return {
-      backgroundColor: "rgba(0, 0, 0, 0.05)",
-      color: "rgba(0, 0, 0, 0.45)",
-    };
-  }
-
-  switch (level?.toLowerCase()) {
-    case "high":
-      return {
-        backgroundColor: "#E8FFEF",
-        color: "#146B2E",
-      };
-    case "medium":
-      return {
-        backgroundColor: "#FCE7C8",
-        color: "#8A4B08",
-      };
-    case "low":
-      return {
-        backgroundColor: "#FFE3E8",
-        color: "#B42318",
-      };
-    default:
-      return {
-        backgroundColor: "#FFFFFF",
-        color: "rgba(0, 0, 0, 0.7)",
-      };
-  }
-}
-
 function DailyListItem({ daily }: DailyListItemProps) {
   const pending = isPendingDaily(daily);
   const empty = isEmptyDaily(daily);
@@ -172,7 +137,7 @@ function DailyListItem({ daily }: DailyListItemProps) {
     <Link
       href={`/dailies/${daily.id}`}
       prefetch={false}
-      className="group block rounded-xl border border-black/10 bg-[#FFF7F9] p-5 transition hover:border-[#FF2D55]/30 hover:bg-white hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
+      className="group block rounded-xl border border-black/10 bg-white p-5 transition hover:border-[#FF2D55]/30 hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
     >
       {content}
     </Link>

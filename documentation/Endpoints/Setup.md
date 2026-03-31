@@ -101,9 +101,8 @@ HTTP/1.1 202 Accepted
 ## `GET /v1/setup`
 
 ### What it does
-Returns whether the authenticated user's setup has completed, derived from the organization's `Daily` records.
-A processed daily is one whose status is either `summarized` or `empty`.
-Setup is complete once at least 7 processed dailies exist for the organization.
+Returns whether the authenticated user's setup has started, derived from the organization's `Daily` records.
+Setup is considered started once at least one `Daily` exists for the organization.
 
 ### What it needs
 - Bearer auth with a Cadence JWT
@@ -115,8 +114,8 @@ Authorization: Bearer <cadence_access_token>
 ```
 
 ### What it returns
-- `404 Not Found` when fewer than 7 processed dailies exist
-- `204 No Content` when at least 7 processed dailies exist
+- `404 Not Found` when no setup `Daily` records exist for the organization
+- `204 No Content` when at least one setup `Daily` exists
 
 ### Not found error example (no organization assigned)
 
@@ -129,14 +128,14 @@ Authorization: Bearer <cadence_access_token>
 }
 ```
 
-### Not found error example (setup not complete)
+### Not found error example (no setup dailies)
 
 ```json
 {
   "error": true,
   "runId": null,
   "schemaVersion": "1.0.0",
-  "reason": "Setup has not completed for the authenticated user."
+  "reason": "No setup found for the authenticated user."
 }
 ```
 

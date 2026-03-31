@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { getConfidencePillStyles } from "@/lib/daily/confidence-pill";
 import { getDailySectionItemKey, getDailySectionItemText } from "@/lib/daily/types";
 import { DailyServerError, fetchServerDaily } from "@/lib/server/dailies";
 import { InfoCard, PageHeader, PageShell, PageSurface } from "@/app/components/page-shell";
@@ -70,7 +71,7 @@ export default async function DailyDetailPage({ params }: DailyDetailPageProps) 
             }
           />
 
-          <InfoCard className="space-y-2" tone="tinted">
+          <InfoCard className="space-y-2">
             <h2 className="text-lg font-bold text-black">Summary</h2>
             <p className="text-base leading-7 text-black">
               {daily.text?.trim() || "No summary text was provided for this daily."}
@@ -80,7 +81,10 @@ export default async function DailyDetailPage({ params }: DailyDetailPageProps) 
           {daily.confidence ? (
             <InfoCard className="space-y-2">
               <h2 className="text-lg font-bold text-black">Confidence</h2>
-              <p className="inline-flex rounded-full bg-[#E8FFEF] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#146B2E]">
+              <p
+                className="inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
+                style={getConfidencePillStyles(daily.confidence.level)}
+              >
                 {daily.confidence.level}
               </p>
               <p className="text-sm text-black/80">{daily.confidence.rationale}</p>

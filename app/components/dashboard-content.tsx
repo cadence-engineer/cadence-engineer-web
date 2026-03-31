@@ -15,7 +15,7 @@ export function DashboardContent({
     <PageShell>
       <PageSurface className="space-y-6">
         <PageHeader title="Dashboard" />
-        <InfoCard tone="tinted">
+        <InfoCard>
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#FF2D55]">
