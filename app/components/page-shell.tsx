@@ -45,6 +45,7 @@ export function PageSurface({
 
 type PageHeaderProps = {
   title: string;
+  titleAccessory?: ReactNode;
   description?: string;
   actions?: ReactNode;
   className?: string;
@@ -53,6 +54,7 @@ type PageHeaderProps = {
 
 export function PageHeader({
   title,
+  titleAccessory,
   description,
   actions,
   className,
@@ -61,16 +63,17 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between",
+        "space-y-1.5",
         divider && "border-b border-black/8 pb-5",
         className,
       )}
     >
-      <div className="space-y-1.5">
-        <h1 className="text-3xl font-bold tracking-tight text-black">{title}</h1>
-        {description ? <p className="text-sm leading-6 text-black/70">{description}</p> : null}
+      <div className="flex flex-end flex-col gap-3 sm:flex-row">
+        <h1 className="min-w-0 flex-1 text-3xl font-bold tracking-tight text-black">{title}</h1>
+        {titleAccessory ? titleAccessory : null}
+        {actions ? <div className="shrink-0">{actions}</div> : null}
       </div>
-      {actions ? <div className="shrink-0">{actions}</div> : null}
+      {description ? <p className="text-sm align-baseline leading-6 text-black/70">{description}</p> : null}
     </div>
   );
 }
