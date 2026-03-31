@@ -14,7 +14,10 @@ function getSignInErrorUrl(request: NextRequest, error: string): URL {
 
 function redirectToSignInWithError(request: NextRequest, error: string): NextResponse {
   const response = NextResponse.redirect(getSignInErrorUrl(request, error));
-  response.cookies.delete(AUTH_COOKIE_NAMES.oauthState);
+  response.cookies.delete({
+    name: AUTH_COOKIE_NAMES.oauthState,
+    path: "/auth/github/callback",
+  });
   return response;
 }
 
@@ -62,7 +65,10 @@ export async function GET(request: NextRequest) {
     }
 
     const response = NextResponse.redirect(new URL("/dashboard", request.url));
-    response.cookies.delete(AUTH_COOKIE_NAMES.oauthState);
+    response.cookies.delete({
+      name: AUTH_COOKIE_NAMES.oauthState,
+      path: "/auth/github/callback",
+    });
     response.cookies.set(AUTH_COOKIE_NAMES.access, accessToken, {
       httpOnly: true,
       secure: getIsSecureCookie(),

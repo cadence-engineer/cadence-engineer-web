@@ -11,7 +11,10 @@ export function getIsSecureCookie(): boolean {
 
 export function clearAuthCookies(response: NextResponse): NextResponse {
   response.cookies.delete(AUTH_COOKIE_NAMES.access);
-  response.cookies.delete(AUTH_COOKIE_NAMES.oauthState);
+  response.cookies.delete({
+    name: AUTH_COOKIE_NAMES.oauthState,
+    path: "/auth/github/callback",
+  });
   return response;
 }
 
