@@ -29,13 +29,14 @@ function formatDailyDate(day: string): string {
 function renderListSection(
   title: string,
   items: Awaited<ReturnType<typeof fetchServerDaily>>["changes"],
+  key?: string,
 ) {
   if (!items || items.length === 0) {
     return null;
   }
 
   return (
-    <InfoCard className="space-y-3">
+    <InfoCard key={key} className="space-y-3">
       <h2 className="text-lg font-bold text-black">{title}</h2>
       <ul className="space-y-2 text-sm leading-6 text-black/80">
         {items.map((item, index) => (
@@ -48,11 +49,23 @@ function renderListSection(
   );
 }
 
+function getSupplementalSections(daily: Awaited<ReturnType<typeof fetchServerDaily>>) {
+  return [
+    { title: "Changes", items: daily.changes },
+    { title: "Intents", items: daily.intents },
+    { title: "Areas", items: daily.areas },
+    { title: "Impacts", items: daily.impacts },
+    { title: "Risks", items: daily.risks },
+    { title: "Implications", items: daily.implications },
+  ].filter((section) => (section.items?.length ?? 0) > 0);
+}
+
 export default async function DailyDetailPage({ params }: DailyDetailPageProps) {
   const { id } = await params;
 
   try {
     const daily = await fetchServerDaily(id);
+    const supplementalSections = getSupplementalSections(daily);
 
     return (
       <PageShell>
@@ -91,14 +104,19 @@ export default async function DailyDetailPage({ params }: DailyDetailPageProps) 
             </InfoCard>
           ) : null}
 
-          <div className="grid gap-4 md:grid-cols-2">
-            {renderListSection("Changes", daily.changes)}
-            {renderListSection("Intents", daily.intents)}
-            {renderListSection("Areas", daily.areas)}
-            {renderListSection("Impacts", daily.impacts)}
-            {renderListSection("Risks", daily.risks)}
-            {renderListSection("Implications", daily.implications)}
-          </div>
+          {supplementalSections.length > 0 ? (
+            <details className="border-t border-black/8 pt-4">
+              <summary className="mb-4 inline-flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-[#FF2D55] underline decoration-[#FF2D55]/50 underline-offset-4 transition hover:text-[#C61A44] hover:decoration-[#C61A44] [&::-webkit-details-marker]:hidden">
+                <span>Details</span>
+              </summary>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                {supplementalSections.map((section) =>
+                  renderListSection(section.title, section.items, section.title),
+                )}
+              </div>
+            </details>
+          ) : null}
         </PageSurface>
       </PageShell>
     );
