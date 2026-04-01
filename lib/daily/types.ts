@@ -124,7 +124,11 @@ function hasItems(items: DailySectionItem[] | null): boolean {
 }
 
 export function isPendingDaily(daily: Daily): boolean {
-  if (daily.status === "pending" || daily.status === "processing") {
+  if (
+    daily.status === "pending" ||
+    daily.status === "processing" ||
+    daily.status === "summarizing"
+  ) {
     return true;
   }
 

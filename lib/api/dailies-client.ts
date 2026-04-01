@@ -1,4 +1,5 @@
 import { fetchBff } from "@/lib/api/client";
+import { toDailyCreationTimestamp } from "@/lib/daily/missing-days";
 import type { Daily } from "@/lib/daily/types";
 import {
   isApiRequestError,
@@ -35,7 +36,7 @@ async function readErrorReason(response: Response): Promise<string> {
 }
 
 async function throwIfUnauthorized(response: Response): Promise<void> {
-  if (response.status === 401) {
+  if (response.status === 401 || response.status === 403) {
     throw new UnauthorizedError();
   }
 }
@@ -84,6 +85,24 @@ export async function fetchDaily(id: string): Promise<Daily> {
 
   const payload = (await response.json()) as DailyResponse;
   return payload.daily;
+}
+
+export async function createDaily(day: string): Promise<void> {
+  const response = await fetchBff("/api/dailies", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ day: toDailyCreationTimestamp(day) }),
+  });
+
+  if (response.status === 202) {
+    return;
+  }
+
+  await assertOk(response);
+
+  throw new ApiRequestError("Daily creation returned an unexpected response", response.status);
 }
 
 export {
