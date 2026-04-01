@@ -3,7 +3,8 @@ import {
   fetchCadenceApi,
   getCadenceRedirectDetails,
 } from "@/lib/server/cadence-api";
-import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
+import { createUnauthorizedResponse } from "@/lib/server/auth-cookies";
+import { getValidAccessTokenFromRequest } from "@/lib/server/access-token";
 
 type Organization = {
   login: string;
@@ -19,10 +20,10 @@ function isOrganization(value: unknown): value is Organization {
 }
 
 export async function GET(request: NextRequest) {
-  const accessToken = request.cookies.get(AUTH_COOKIE_NAMES.access)?.value;
+  const accessToken = getValidAccessTokenFromRequest(request);
 
   if (!accessToken) {
-    return NextResponse.json({ reason: "Unauthorized" }, { status: 401 });
+    return createUnauthorizedResponse();
   }
 
   try {
@@ -62,6 +63,10 @@ export async function GET(request: NextRequest) {
         status: response.status,
         backendError,
       });
+
+      if (response.status === 401 || response.status === 403) {
+        return createUnauthorizedResponse("Unauthorized", response.status);
+      }
 
       return NextResponse.json(
         { reason: "Failed to fetch organizations" },

@@ -3,6 +3,7 @@
 import { Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { LogoGithub } from "geist/icons";
+import { PageHeader, PageShell, PageSurface } from "@/app/components/page-shell";
 
 function getErrorMessage(error: string | null): string | null {
   switch (error) {
@@ -28,16 +29,15 @@ function SignInContent() {
   const authUrl = "/auth/github/start";
 
   return (
-    <main className="flex h-full items-center justify-center bg-transparent px-6 py-8 md:px-8 md:py-10">
-      <section className="w-full max-w-md rounded-2xl bg-white p-8 shadow-[0_14px_40px_rgba(0,0,0,0.18)] md:p-10">
-        <h1 className="mb-2 text-3xl font-bold tracking-tight text-black">
-          Sign in
-        </h1>
-        <p className="mb-6 text-black">
-          Continue to your Cadence Engineer dashboard.
-        </p>
+    <PageShell className="flex items-center justify-center">
+      <PageSurface className="space-y-6" width="narrow">
+        <PageHeader
+          title="Sign in"
+          description="Continue to your Cadence Engineer dashboard."
+          divider={false}
+        />
         {errorMessage ? (
-          <p className="mb-4 rounded-md bg-[#FFE8EE] px-3 py-2 text-sm text-[#8A1230]">
+          <p className="rounded-md bg-[#FFE8EE] px-3 py-2 text-sm text-[#8A1230]">
             {errorMessage}
           </p>
         ) : null}
@@ -48,14 +48,20 @@ function SignInContent() {
           <LogoGithub className="h-5 w-5" />
           Sign in with GitHub
         </a>
-      </section>
-    </main>
+      </PageSurface>
+    </PageShell>
   );
 }
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<main className="flex h-full items-center justify-center bg-transparent px-6 py-8 md:px-8 md:py-10" />}>
+    <Suspense
+      fallback={
+        <PageShell className="flex items-center justify-center">
+          {null}
+        </PageShell>
+      }
+    >
       <SignInContent />
     </Suspense>
   );

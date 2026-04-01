@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageHeader, PageShell, PageSurface } from "@/app/components/page-shell";
 
 export const metadata: Metadata = {
   title: "Cookies | Cadence Engineer",
@@ -7,20 +8,20 @@ export const metadata: Metadata = {
 
 export default function CookiesPage() {
   return (
-    <main className="h-full bg-transparent px-6 py-8 md:px-8 md:py-10">
-      <section className="mx-auto w-full max-w-4xl rounded-2xl bg-white p-8 shadow-[0_14px_40px_rgba(0,0,0,0.18)] md:p-10">
-        <h1 className="mb-4 text-3xl font-bold tracking-tight text-black">Cookies</h1>
-        <p className="mb-4 text-black">
+    <PageShell>
+      <PageSurface className="space-y-6">
+        <PageHeader title="Cookies" />
+        <p className="text-black/80">
           We only use cookies that are needed to run this service. They keep you signed in and help keep your
           account secure while you use the app.
         </p>
-        <p className="mb-4 text-black">
+        <p className="text-black/80">
           We do not use cookies for ads, analytics, or tracking you across other websites.
         </p>
-        <p className="text-black">
+        <p className="text-black/80">
           We also do not collect personal profile information through cookies.
         </p>
-      </section>
-    </main>
+      </PageSurface>
+    </PageShell>
   );
 }

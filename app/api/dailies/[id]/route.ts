@@ -5,30 +5,20 @@ import {
 } from "@/lib/server/cadence-api";
 import { createUnauthorizedResponse } from "@/lib/server/auth-cookies";
 import { getValidAccessTokenFromRequest } from "@/lib/server/access-token";
+import { parseDaily } from "@/lib/daily/types";
 
-type OrganizationResponse = {
-  login: string;
+type RouteContext = {
+  params: Promise<{
+    id: string;
+  }>;
 };
 
-function isOrganizationResponse(value: unknown): value is OrganizationResponse {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
-
-  const maybeOrganization = value as Record<string, unknown>;
-  return typeof maybeOrganization.login === "string";
-}
-
-function createRedirectErrorResponse(
-  request: NextRequest,
-  response: Response,
-  reason: string,
-) {
+function createRedirectErrorResponse(request: NextRequest, response: Response) {
   const redirectDetails = getCadenceRedirectDetails(request, response);
 
   return NextResponse.json(
     {
-      reason,
+      reason: "Reauthentication required",
       code: redirectDetails.reauthUrl ? "reauth_required" : "upstream_redirect",
       reauthUrl: redirectDetails.reauthUrl,
       upstreamLocation: redirectDetails.upstreamLocation,
@@ -38,15 +28,17 @@ function createRedirectErrorResponse(
   );
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest, context: RouteContext) {
   const accessToken = getValidAccessTokenFromRequest(request);
 
   if (!accessToken) {
     return createUnauthorizedResponse();
   }
 
+  const { id } = await context.params;
+
   try {
-    const response = await fetchCadenceApi("/v1/organization", {
+    const response = await fetchCadenceApi(`/v1/dailies/${id}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -56,26 +48,19 @@ export async function GET(request: NextRequest) {
     });
 
     if (response.status >= 300 && response.status < 400) {
-      return createRedirectErrorResponse(
-        request,
-        response,
-        "Reauthentication required",
-      );
+      return createRedirectErrorResponse(request, response);
     }
 
     if (!response.ok) {
-      if (response.status === 404) {
-        return NextResponse.json({ login: null });
-      }
-
       let backendError = "<failed to read backend error>";
       try {
         backendError = await response.text();
       } catch (error) {
-        console.error("Failed reading organization error body", error);
+        console.error("Failed reading daily error body", error);
       }
 
-      console.error("BFF organization request failed", {
+      console.error("BFF daily request failed", {
+        id,
         status: response.status,
         backendError,
       });
@@ -85,33 +70,21 @@ export async function GET(request: NextRequest) {
       }
 
       return NextResponse.json(
-        { reason: "Failed to fetch organization" },
+        { reason: response.status === 404 ? "Daily not found" : "Failed to fetch daily" },
         { status: response.status },
       );
     }
 
     const payload = (await response.json()) as unknown;
-    if (!isOrganizationResponse(payload)) {
-      console.error("Organization payload has invalid shape", payload);
-      return NextResponse.json(
-        { reason: "Failed to fetch organization" },
-        { status: 502 },
-      );
+    const daily = parseDaily(payload);
+    if (!daily) {
+      console.error("Daily payload has invalid shape", payload);
+      return NextResponse.json({ reason: "Failed to fetch daily" }, { status: 502 });
     }
 
-    return NextResponse.json({ login: payload.login });
+    return NextResponse.json({ daily });
   } catch (error) {
-    console.error("BFF organization request crashed", error);
-    return NextResponse.json(
-      { reason: "Failed to fetch organization" },
-      { status: 502 },
-    );
+    console.error("BFF daily request crashed", { id, error });
+    return NextResponse.json({ reason: "Failed to fetch daily" }, { status: 502 });
   }
-}
-
-export async function PUT() {
-  return NextResponse.json(
-    { reason: "Use POST /api/setup to assign and initialize an organization." },
-    { status: 405 },
-  );
 }
