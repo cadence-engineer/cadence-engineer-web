@@ -11,6 +11,7 @@ export type Daily = {
   title: string;
   status?: string;
   text: string | null;
+  highlights: string[];
   changes: DailySectionItem[] | null;
   intents: DailySectionItem[] | null;
   areas: DailySectionItem[] | null;
@@ -30,6 +31,10 @@ function getFallbackTitle(day: string, status?: string): string {
 
 function isDailySectionItem(value: unknown): value is DailySectionItem {
   return typeof value === "string" || (typeof value === "object" && value !== null);
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
 }
 
 export function isDailySectionArrayOrNull(value: unknown): value is DailySectionItem[] | null {
@@ -83,6 +88,7 @@ export function parseDaily(value: unknown): Daily | null {
   }
 
   if (
+    !isStringArray(maybeDaily.highlights ?? []) ||
     !isDailySectionArrayOrNull(maybeDaily.changes ?? null) ||
     !isDailySectionArrayOrNull(maybeDaily.intents ?? null) ||
     !isDailySectionArrayOrNull(maybeDaily.areas ?? null) ||
@@ -105,6 +111,7 @@ export function parseDaily(value: unknown): Daily | null {
     title,
     status,
     text: typeof maybeDaily.text === "string" ? maybeDaily.text : null,
+    highlights: (maybeDaily.highlights ?? []) as string[],
     changes: (maybeDaily.changes ?? null) as DailySectionItem[] | null,
     intents: (maybeDaily.intents ?? null) as DailySectionItem[] | null,
     areas: (maybeDaily.areas ?? null) as DailySectionItem[] | null,
@@ -124,20 +131,17 @@ function hasItems(items: DailySectionItem[] | null): boolean {
 }
 
 export function isPendingDaily(daily: Daily): boolean {
-  if (
-    daily.status === "pending" ||
-    daily.status === "processing" ||
-    daily.status === "summarizing"
-  ) {
-    return true;
-  }
-
-  if (daily.status === "empty") {
-    return false;
+  if (typeof daily.status === "string") {
+    return (
+      daily.status === "pending" ||
+      daily.status === "processing" ||
+      daily.status === "summarizing"
+    );
   }
 
   return (
     daily.text === null &&
+    daily.highlights.length === 0 &&
     !hasItems(daily.changes) &&
     !hasItems(daily.intents) &&
     !hasItems(daily.areas) &&

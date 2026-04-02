@@ -17,7 +17,8 @@ Lists daily summaries for the authenticated user's selected organization.
   - `day` (string, `YYYY-MM-DD`)
   - `status` (string: `pending`, `summarizing`, `summarized`, `empty`, or `failed`)
   - `title` (string)
-  - `text` (string)
+  - `text` (string, short standalone daily summary)
+  - `highlights` (array of strings, scan-friendly summary list, may be empty)
   - `changes` (array or null)
   - `intents` (array or null)
   - `areas` (array or null)
@@ -34,8 +35,12 @@ Lists daily summaries for the authenticated user's selected organization.
     "id": "8cc5c9aa-2e73-4e11-b84a-7e457ad01f95",
     "day": "2026-03-10",
     "status": "summarized",
-    "title": "Daily Summary",
-    "text": "Two pull requests were merged for the authenticated organization.",
+    "title": "Release reliability improved",
+    "text": "Release reliability improved for downstream users.",
+    "highlights": [
+      "Tightened output validation for malformed responses.",
+      "Added retry handling for temporary upstream failures."
+    ],
     "changes": [],
     "intents": [],
     "areas": [],
@@ -67,7 +72,8 @@ Returns a single daily summary for the authenticated user's selected organizatio
   - `day` (string, `YYYY-MM-DD`)
   - `status` (string: `pending`, `summarizing`, `summarized`, `empty`, or `failed`)
   - `title` (string)
-  - `text` (string)
+  - `text` (string, short standalone daily summary)
+  - `highlights` (array of strings, scan-friendly summary list, may be empty)
   - `changes` (array or null)
   - `intents` (array or null)
   - `areas` (array or null)
@@ -83,8 +89,12 @@ Returns a single daily summary for the authenticated user's selected organizatio
   "id": "8cc5c9aa-2e73-4e11-b84a-7e457ad01f95",
   "day": "2026-03-10",
   "status": "summarized",
-  "title": "Daily Summary",
-  "text": "Two pull requests were merged for the authenticated organization.",
+  "title": "Release reliability improved",
+  "text": "Release reliability improved for downstream users.",
+  "highlights": [
+    "Tightened output validation for malformed responses.",
+    "Added retry handling for temporary upstream failures."
+  ],
   "changes": [],
   "intents": [],
   "areas": [],
@@ -148,5 +158,43 @@ The day must be in the past and within the last 8 days. Returns `409 Conflict` i
   "runId": "8CC5C9AA-2E73-4E11-B84A-7E457AD01F95",
   "schemaVersion": "1.0.0",
   "reason": "day must be in the past and within the last 8 days"
+}
+```
+
+---
+
+## `POST /v1/dailies/:id/retry`
+
+### What it does
+Retries summarization for an existing failed daily summary in the authenticated user's selected organization.
+The daily must currently have status `failed`.
+
+### What it needs
+- Bearer auth with a Cadence JWT
+- A GitHub App installation with an access token for the user's organization
+- Path parameter:
+  - `id` (UUID, required)
+- No request body
+
+### What it returns
+- `202 Accepted` — retry started in background
+
+### Common error examples
+
+```json
+{
+  "error": true,
+  "runId": "8CC5C9AA-2E73-4E11-B84A-7E457AD01F95",
+  "schemaVersion": "1.0.0",
+  "reason": "Only failed daily summaries can be retried."
+}
+```
+
+```json
+{
+  "error": true,
+  "runId": "8CC5C9AA-2E73-4E11-B84A-7E457AD01F95",
+  "schemaVersion": "1.0.0",
+  "reason": "Daily summary not found for the authenticated organization."
 }
 ```
