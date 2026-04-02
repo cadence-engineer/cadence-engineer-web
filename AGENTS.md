@@ -17,6 +17,12 @@ Agents working here should prioritize:
 - Linting: ESLint (`eslint-config-next`).
 - Package manager: `pnpm`.
 
+## UI Component Rules
+- Prefer Geist UI components where they fit the need.
+- Use Geist UI components directly instead of wrapping them in local components unless there is a clear reason such as shared app-specific behavior, repeated composition, or a required client/server boundary.
+- Do not introduce wrapper components just to rename, restyle, or forward a single existing component.
+- If a third-party component is client-only, keep the client boundary as small as possible.
+
 ## Common Commands
 - Install deps: `pnpm install`
 - Dev server: `pnpm dev`

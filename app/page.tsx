@@ -1,19 +1,25 @@
-import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { RotatingAudience } from "./components/rotating-audience";
-import { AUTH_COOKIE_NAMES } from "@/lib/server/auth-cookies";
-import { DashboardContent } from "./components/dashboard-content";
+import { DailiesContent } from "./components/dailies-content";
+import { getValidAccessTokenFromCookies } from "@/lib/server/auth-session";
+import { fetchDashboardSetupState } from "@/lib/server/setup";
 
-type HomePageProps = {
-  searchParams: Promise<{ auth?: string }>;
-};
+export default async function Home() {
+  const accessToken = await getValidAccessTokenFromCookies();
 
-export default async function Home({ searchParams }: HomePageProps) {
-  const cookieStore = await cookies();
-  const { auth } = await searchParams;
-  const isSignedIn = Boolean(cookieStore.get(AUTH_COOKIE_NAMES.access)?.value);
+  if (accessToken) {
+    const { isSetupComplete, isUnauthorized } =
+      await fetchDashboardSetupState(accessToken);
 
-  if (isSignedIn) {
-    return <DashboardContent showAuthSuccess={auth === "success"} />;
+    if (isUnauthorized) {
+      redirect("/auth/sign-out");
+    }
+
+    if (!isSetupComplete) {
+      redirect("/dashboard");
+    }
+
+    return <DailiesContent />;
   }
 
   return (

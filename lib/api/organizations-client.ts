@@ -29,6 +29,20 @@ export function isReauthRequiredError(error: unknown): error is ReauthRequiredEr
   return error instanceof ReauthRequiredError;
 }
 
+export class ApiRequestError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiRequestError";
+    this.status = status;
+  }
+}
+
+export function isApiRequestError(error: unknown): error is ApiRequestError {
+  return error instanceof ApiRequestError;
+}
+
 type RedirectErrorResponse = {
   code?: string;
   reauthUrl?: string;
@@ -42,7 +56,7 @@ async function throwIfReauthRequired(response: Response): Promise<void> {
   let payload: RedirectErrorResponse | null = null;
 
   try {
-    payload = (await response.json()) as RedirectErrorResponse;
+    payload = (await response.clone().json()) as RedirectErrorResponse;
   } catch {
     return;
   }
@@ -60,6 +74,22 @@ type OrganizationsResponse = {
   organizations: Organization[];
 };
 
+type ErrorResponse = {
+  reason?: string;
+};
+
+async function readErrorReason(response: Response): Promise<string> {
+  try {
+    const payload = (await response.json()) as ErrorResponse;
+    if (typeof payload.reason === "string" && payload.reason.length > 0) {
+      return payload.reason;
+    }
+  } catch {
+    // Ignore parse errors and fall back to a generic message.
+  }
+
+  return `Request failed with status ${response.status}`;
+}
 export async function fetchOrganizations(): Promise<Organization[]> {
   const response = await fetchBff("/api/organizations", { method: "GET" });
 
@@ -100,9 +130,33 @@ export async function fetchSelectedOrganizationLogin(): Promise<string | null> {
   return typeof payload.login === "string" ? payload.login : null;
 }
 
-export async function updateSelectedOrganization(login: string): Promise<string> {
-  const response = await fetchBff("/api/organization", {
-    method: "PUT",
+export async function fetchSetupRequired(): Promise<boolean> {
+  const response = await fetchBff("/api/setup", { method: "GET" });
+
+  if (response.status === 401) {
+    throw new UnauthorizedError();
+  }
+
+  await throwIfReauthRequired(response);
+
+  if (response.status === 404) {
+    return true;
+  }
+
+  if (response.status === 204) {
+    return false;
+  }
+
+  if (!response.ok) {
+    throw new ApiRequestError(await readErrorReason(response), response.status);
+  }
+
+  throw new ApiRequestError("Setup request returned an unexpected response", response.status);
+}
+
+export async function startSetup(login: string): Promise<void> {
+  const response = await fetchBff("/api/setup", {
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
@@ -115,16 +169,13 @@ export async function updateSelectedOrganization(login: string): Promise<string>
 
   await throwIfReauthRequired(response);
 
+  if (response.status === 202) {
+    return;
+  }
+
   if (!response.ok) {
-    throw new Error(
-      `Organization update request failed with status ${response.status}`,
-    );
+    throw new ApiRequestError(await readErrorReason(response), response.status);
   }
 
-  const payload = (await response.json()) as SelectedOrganizationResponse;
-  if (typeof payload.login !== "string") {
-    throw new Error("Organization update returned invalid payload");
-  }
-
-  return payload.login;
+  throw new ApiRequestError("Setup start returned an unexpected response", response.status);
 }

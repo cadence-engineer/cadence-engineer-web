@@ -29,6 +29,7 @@ export default function PricingPage() {
             </div>
             <Link
               href="/sign-in"
+              prefetch={false}
               className="inline-flex w-full items-center justify-center rounded-lg bg-[#FF2D55] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#E60045]"
             >
               Get started
