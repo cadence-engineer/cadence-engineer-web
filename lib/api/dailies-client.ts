@@ -105,6 +105,20 @@ export async function createDaily(day: string): Promise<void> {
   throw new ApiRequestError("Daily creation returned an unexpected response", response.status);
 }
 
+export async function retryDaily(id: string): Promise<void> {
+  const response = await fetchBff(`/api/dailies/${id}/retry`, {
+    method: "POST",
+  });
+
+  if (response.status === 202) {
+    return;
+  }
+
+  await assertOk(response);
+
+  throw new ApiRequestError("Daily retry returned an unexpected response", response.status);
+}
+
 export {
   ApiRequestError,
   isApiRequestError,

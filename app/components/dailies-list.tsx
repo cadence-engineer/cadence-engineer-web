@@ -9,6 +9,7 @@ import {
   isApiRequestError,
   isReauthRequiredError,
   isUnauthorizedError,
+  retryDaily,
 } from "@/lib/api/dailies-client";
 import { getConfidencePillStyles } from "@/lib/daily/confidence-pill";
 import { getMissingDailyDays } from "@/lib/daily/missing-days";
@@ -44,27 +45,35 @@ type DailyListEntry =
     }
   | {
       type: "actionable";
-      variant: "missing" | "no-confidence";
+      variant: "missing";
       day: string;
+      key: string;
+    }
+  | {
+      type: "actionable";
+      variant: "failed";
+      day: string;
+      id: string;
       key: string;
     };
 
-function isNoConfidenceDaily(daily: Daily): boolean {
-  return !isPendingDaily(daily) && !isEmptyDaily(daily) && daily.confidence === null;
+function isFailedDaily(daily: Daily): boolean {
+  return daily.status === "failed";
 }
 
 export function DailiesList({ dailies }: DailiesListProps) {
   const router = useRouter();
-  const [creatingDays, setCreatingDays] = useState<string[]>([]);
-  const [createErrors, setCreateErrors] = useState<Record<string, string>>({});
+  const [submittingKeys, setSubmittingKeys] = useState<string[]>([]);
+  const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
 
   const items: DailyListEntry[] = [
     ...dailies.map((daily) =>
-      isNoConfidenceDaily(daily)
+      isFailedDaily(daily)
         ? {
             type: "actionable" as const,
-            variant: "no-confidence" as const,
+            variant: "failed" as const,
             day: daily.day,
+            id: daily.id,
             key: daily.id,
           }
         : {
@@ -82,33 +91,38 @@ export function DailiesList({ dailies }: DailiesListProps) {
     })),
   ].sort((left, right) => right.day.localeCompare(left.day));
 
-  async function handleCreateDaily(day: string) {
-    let shouldCreate = false;
-    setCreatingDays((current) => {
-      if (current.includes(day)) {
+  async function handleActionableDaily(item: Extract<DailyListEntry, { type: "actionable" }>) {
+    let shouldSubmit = false;
+    setSubmittingKeys((current) => {
+      if (current.includes(item.key)) {
         return current;
       }
 
-      shouldCreate = true;
-      return [...current, day];
+      shouldSubmit = true;
+      return [...current, item.key];
     });
 
-    if (!shouldCreate) {
+    if (!shouldSubmit) {
       return;
     }
 
-    setCreateErrors((current) => {
-      if (!(day in current)) {
+    setActionErrors((current) => {
+      if (!(item.key in current)) {
         return current;
       }
 
       const next = { ...current };
-      delete next[day];
+      delete next[item.key];
       return next;
     });
 
     try {
-      await createDaily(day);
+      if (item.variant === "missing") {
+        await createDaily(item.day);
+      } else {
+        await retryDaily(item.id);
+      }
+
       startTransition(() => {
         router.refresh();
       });
@@ -130,14 +144,16 @@ export function DailiesList({ dailies }: DailiesListProps) {
         return;
       }
 
-      console.error("Failed creating daily", { day, error });
-      setCreateErrors((current) => ({
+      console.error("Failed submitting daily action", { item, error });
+      setActionErrors((current) => ({
         ...current,
-        [day]: isApiRequestError(error)
+        [item.key]: isApiRequestError(error)
           ? error.message
-          : "Could not create daily. Please try again.",
+          : item.variant === "missing"
+            ? "Could not create daily. Please try again."
+            : "Could not retry daily. Please try again.",
       }));
-      setCreatingDays((current) => current.filter((value) => value !== day));
+      setSubmittingKeys((current) => current.filter((value) => value !== item.key));
     }
   }
 
@@ -162,9 +178,9 @@ export function DailiesList({ dailies }: DailiesListProps) {
             key={item.key}
             day={item.day}
             variant={item.variant}
-            errorMessage={createErrors[item.day] ?? null}
-            isCreating={creatingDays.includes(item.day)}
-            onCreate={() => void handleCreateDaily(item.day)}
+            errorMessage={actionErrors[item.key] ?? null}
+            isSubmitting={submittingKeys.includes(item.key)}
+            onAction={() => void handleActionableDaily(item)}
           />
         ),
       )}
@@ -251,27 +267,27 @@ function DailyListItem({ daily }: DailyListItemProps) {
 
 type ActionableDailyListItemProps = {
   day: string;
-  variant: "missing" | "no-confidence";
+  variant: "missing" | "failed";
   errorMessage: string | null;
-  isCreating: boolean;
-  onCreate: () => void;
+  isSubmitting: boolean;
+  onAction: () => void;
 };
 
 function ActionableDailyListItem({
   day,
   variant,
   errorMessage,
-  isCreating,
-  onCreate,
+  isSubmitting,
+  onAction,
 }: ActionableDailyListItemProps) {
-  const statusLabel = variant === "missing" ? "Missing" : "No confidence";
+  const statusLabel = variant === "missing" ? "Missing" : "Failed";
 
   return (
     <div className="space-y-2">
       <button
         type="button"
-        onClick={onCreate}
-        disabled={isCreating}
+        onClick={onAction}
+        disabled={isSubmitting}
         className="group flex w-full flex-col gap-3 rounded-xl border border-dashed border-[#FF2D55]/35 bg-[#FFF7F9] p-5 text-left transition hover:border-[#FF2D55] hover:shadow-[0_10px_30px_rgba(255,45,85,0.12)] disabled:cursor-not-allowed disabled:opacity-80"
       >
         <div className="flex items-start justify-between gap-3">
@@ -284,7 +300,7 @@ function ActionableDailyListItem({
         </div>
 
         <div className="flex min-h-28 items-center justify-center py-3">
-          {isCreating ? (
+          {isSubmitting ? (
             <PendingDailyLoading />
           ) : variant === "missing" ? (
             <Plus

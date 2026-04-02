@@ -65,6 +65,7 @@ export default async function DailyDetailPage({ params }: DailyDetailPageProps) 
 
   try {
     const daily = await fetchServerDaily(id);
+    const highlights = daily.highlights.filter((highlight) => highlight.trim().length > 0);
     const supplementalSections = getSupplementalSections(daily);
 
     return (
@@ -87,6 +88,14 @@ export default async function DailyDetailPage({ params }: DailyDetailPageProps) 
           <p className="text-base leading-7 text-black">
             {daily.text?.trim() || "No summary text was provided for this daily."}
           </p>
+
+          {highlights.length > 0 ? (
+            <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-black/80">
+              {highlights.map((highlight, index) => (
+                <li key={`${daily.id}:highlight:${index}`}>{highlight}</li>
+              ))}
+            </ul>
+          ) : null}
 
           {daily.confidence ? (
             <>
